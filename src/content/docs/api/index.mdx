@@ -12,18 +12,20 @@ import Frame from "/src/components/Frame.astro";
 <br/>
 
 <Frame>
-    단말기로부터 발생한 매출 데이터와 가맹점 시스템과 연계할 수 있는 부가서비스를 `B2B` API 형태로 제공합니다.
-    <br/>
+    단말기로부터 발생한 매출 데이터와 가맹점 시스템을 연계할 수 있는 부가 서비스를<br/>
+    `B2B` API 형태로 제공합니다.
 
-    카드 승인정보(API 제공)는 여신전문금융업법 및 개인정보보호법상 민감 정보에 해당할 수 있어
+    카드 승인정보(API 제공)는 `여신전문금융업법` 및 `개인정보보호법`에 따라<br/>
+    민감 정보에 해당될 수 있어, `금융감독기관`의 검사 대상 사업자에 한해 제공됩니다.<br/><br/>
 
-    `금융감독기관`의 **검사 대상 사업자** 에 한해 제공하고 있습니다.<br/><br/>
+    따라서 아래 조건을 모두 충족하는 경우에만 서비스 이용이 가능합니다.
 
-    이로 인해 아래 조건을 모두 만족해야만 서비스를 이용할 수 있습니다.
     - 금융감독원 검사 대상 법인
     - ISMS 또는 ISMS-P 인증 보유
     - 정보보호 책임자 지정 및 관리체계 보유
-    - 별도 API 연동 계약 체결(유비씨엔)
+    - 유비씨엔과 별도의 API 연동 계약 체결
+    <br/>
+    ※ 무료로 제공되는 일부 기능의 경우, 변경 사항에 대한 별도의 안내가 제공되지 않을 수 있습니다.
 </Frame>
 <Frame>
     ### 지원 서비스
@@ -37,15 +39,18 @@ import Frame from "/src/components/Frame.astro";
 </Frame>
 <Frame>
     ### 사전 준비 사항
-    유비씨엔 API를 사용하기 위해서는 먼저, 가맹점 고유번호인 `company`와 암호화 된 `token`을 발급받아야 합니다. 해당 정보는 유비씨엔 관리자에게 문의하여 발급받을 수 있습니다.
+    유비씨엔 API를 사용하기 위해서는 먼저 가맹점 고유번호(company)와 암호화된 토큰(token)을 발급받아야 합니다. <br/>
+    해당 정보는 유비씨엔 관리자에게 문의하여 발급받을 수 있습니다.
 </Frame>
 <Frame>
     ### Request Schema
     <table>
         <thead>
+        <tr>
             <th className={"text-center"}>Content-Type</th>
             <th className={"text-center"}>company</th>
             <th className={"text-center"}>token</th>
+        </tr>
         </thead>
         <tbody>
         <tr>
