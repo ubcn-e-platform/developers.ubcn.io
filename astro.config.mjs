@@ -53,6 +53,16 @@ export default defineConfig({
                         {
                             label: '2026년 3월',
                             autogenerate: {directory: 'release-notes/2026-03'},
+                            collapsed: true
+                        },
+                        {
+                            label: '2026년 4월',
+                            autogenerate: {directory: 'release-notes/2026-04'},
+                            collapsed: true
+                        },
+                        {
+                            label: '2026년 5월',
+                            autogenerate: {directory: 'release-notes/2026-05'},
                             collapsed: false
                         },
 
@@ -61,8 +71,27 @@ export default defineConfig({
                 {
                     label: 'API',
                     badge: {text: '유료', variant: 'caution'},
-                    autogenerate: {directory: 'api'},
-                    collapsed: true
+                    collapsed: true,
+                    items: [
+                        {label: '시작하기', slug: 'api'},
+                        {label: '응답코드 정리', slug: 'api/code'},
+                        {label: '거래내역 요청', slug: 'api/sales'},
+                        {label: '마감내역 요청', slug: 'api/closing'},
+                        {label: '상태이상 정보 요청', slug: 'api/controlerror'},
+                        {
+                            label: '기타결제',
+                            collapsed: true,
+                            items: [
+                                {
+                                    label: '복지카드',
+                                    collapsed: true,
+                                    autogenerate: {directory: 'api/welpoint'},
+                                },
+                                {label: '쿠폰', slug: 'api/coupon'},
+                                {label: '서비스코인', slug: 'api/servicecoin'},
+                            ],
+                        },
+                    ],
                 },
                 {
                     label: '네트워크',
