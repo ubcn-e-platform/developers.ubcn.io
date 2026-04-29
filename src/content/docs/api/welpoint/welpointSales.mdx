@@ -17,36 +17,50 @@ import Table from "/src/components/Table.astro";
 <Frame>
 웰포인트 API를 이용하여 거래내역을 요청 할 수 있습니다. 서비스 테스트를 위해서는 API 호출이 필요합니다.
 
-거래내역 조회는 일 단위로 가능합니다.
+<b>거래내역 조회는 `일 단위`로 가능합니다.</b>
 </Frame>
 
-## 기본 호출 구문
+## 거래내역 조회
 <Frame>
-```ts
+    ### Request Schema
+    요청에서 필요로 하는 필드는 다음과 같습니다.
+    <Table
+        headers={[{"title": "필드명"}, {"subTitle": "상세필드명"}, {"notNull": "필수"},
+            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
+        bodys={[
+            [
+                {"title": "date"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "거래일자"},
+                {"etc": `일자 규격은 'YYYYMMDD'를 따름.`},
+            ],
+        ]}>
+    </Table>
+    ### 호출구문
+    ```ts
+    const API = axios.create({
+            baseURL: `http://api.ubcn.co.kr/api`,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "PER-ID": "{유출금지}",
+                "PER-TOKEN": "{유출금지}",
+            },
+    });
 
-const API = axios.create({
-  baseURL: `http://api.ubcn.co.kr/api`,
-  headers: {
-    "Access-Control-Allow-Origin": "*",
-    "PER-ID": "{유출금지}",
-    "PER-TOKEN": "{유출금지}",
-  },
-});
+        // post 요청만을 지원합니다.
+        // {date}는 "YYYYMMDD" 규격을 따릅니다.
+        const res = await API.post("/well/sales/{date}");
+        console.log(res.data);
 
-// post 요청만을 지원합니다.
-// {date}는 "YYYYMMDD" 형식을 따릅니다.
-const res = await API.post("/well/sales/{date}");
-console.log(res.data);
+        // 프로세스가 제대로 완료되지 않은 경우 에러 코드가 존재합니다.
+        if (res.code != null) {
+            return alert(res.decription);
+        }
+    ```
+    <br/>
 
-// 프로세스가 제대로 완료되지 않은 경우 에러 코드가 존재합니다.
-if (res.code != null) {
-  return alert(res.decription);
-}
-
-```
-</Frame>
-
-<Frame>
     ### Response Schema
     결과 값에 들어 있는 필드는 다음과 같습니다.
     <Table
@@ -74,7 +88,7 @@ if (res.code != null) {
                 {"subTitle": "-"},
                 {"notNull": "Y"},
                 {"argsType": "int"},
-                {"desc": "조회결과 개수"},
+                {"desc": "조회된 거래 건수"},
                 {"etc": "-"},
             ],
             [
@@ -178,4 +192,27 @@ if (res.code != null) {
             ],
         ]}>
     </Table>
+</Frame>
+
+<Frame>
+    ### Response JSON 예시
+    ```json
+    {
+        "findCnt": 2,
+        "foundList":[{
+            "tranDate": "20220927",
+            "tsType": "취소",
+            "tsNo": "4",
+            "terminalID": "2000011111",
+            "cardNo": "CARDubcn",
+            "vmOut": "0",
+            "vColumn": "01",
+            "pName": "상품명",
+            "originDate": "20220928",
+            "originTsNo": "1"
+        },{..}],
+            "result_code": "0000",
+            "result_msg": "Success"
+    }
+    ```
 </Frame>
