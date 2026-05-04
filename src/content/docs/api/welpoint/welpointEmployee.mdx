@@ -127,62 +127,143 @@ const API = axios.create({
         {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
     bodys={[
         [
-            {"title": "seq"},
+            {"title": "findCnt"},
             {"subTitle": "-"},
             {"notNull": "Y"},
             {"argsType": "int"},
-            {"desc": "seq"},
+            {"desc": "조회된 사원(사용자) 수"},
             {"etc": "-"},
         ],
         [
-            {"title": "name"},
+            {"title": "foundList"},
+            {"subTitle": "-"},
+            {"notNull": "Y"},
+            {"argsType": "Array"},
+            {"desc": "조회된 사원(사용자) 리스트"},
+            {"etc": "아래 foundList 내부 필드 설명 참조"},
+        ],
+        [
+            {"title": "result_msg"},
             {"subTitle": "-"},
             {"notNull": "Y"},
             {"argsType": "String"},
-            {"desc": "고객사명"},
+            {"desc": "응답 메시지"},
             {"etc": "-"},
         ],
         [
-            {"title": "tranOption"},
+            {"title": "result_code"},
             {"subTitle": "-"},
             {"notNull": "Y"},
             {"argsType": "String"},
-            {"desc": "정책"},
-            {"etc": "'0 : 가용마일리지 초과 허용, 1 : 가용마일리지 초과 불허용"},
-        ],
-        [
-            {"title": "validity"},
-            {"subTitle": "-"},
-            {"notNull": "Y"},
-            {"argsType": "String"},
-            {"desc": "유효성체크값"},
-            {"etc": "-"},
-        ],
-        [
-            {"title": "perisisType"},
-            {"subTitle": "-"},
-            {"notNull": "Y"},
-            {"argsType": "String"},
-            {"desc": "연동타입"},
-            {"etc": "-"},
-        ],
-        [
-            {"title": "perisisComp"},
-            {"subTitle": "-"},
-            {"notNull": "Y"},
-            {"argsType": "String"},
-            {"desc": "연동ID"},
+            {"desc": "응답 코드"},
             {"etc": "-"},
         ],
     ]}>
 </Table>
 </Frame>
 
+<Frame>
+    ### foundList 내부 필드 설명
+    foundList는 사원(사용자)의 배열로, 내부 객체는 다음과 같은 필드를 포함합니다.
+    <Table
+        headers={[{"title": "필드명"}, {"subTitle": "상세필드명"}, {"notNull": "필수"},
+            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
+        bodys={[
+            [
+                {"title": "seq"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "int"},
+                {"desc": "사용자의 SEQ"},
+                {"etc": "-"},
+            ],
+            [
+                {"title": "cseq"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "고객사 SEQ"},
+                {"etc": "-"},
+            ],
+            [
+                {"title": "userCardNo"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "카드번호"},
+                {"etc": "-"},
+            ],
+            [
+                {"title": "userNo"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "사용자 식별번호"},
+                {"etc": "-"},
+            ],
+            [
+                {"title": "userName"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "사용자 명"},
+                {"etc": "-"},
+            ],
+            [
+                {"title": "vm"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "현재 포인트 잔액"},
+                {"etc": "마이너스가 가능하여 String Type"},
+            ],
+            [
+                {"title": "grade"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "등급"},
+                {"etc": "현재 미사용 데이터"},
+            ],
+            [
+                {"title": "validity"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "사용자 활성화 여부"},
+                {"etc": "1: 활성화, 0: 삭제상태"},
+            ],
+        ]}>
+    </Table>
+</Frame>
+
+<Frame>
+    ### Response JSON 예시
+    ```json
+    {
+        "findCnt": 1,
+        "foundList": [
+            {
+                "seq": "1",
+                "cseq": "1"
+                "userCardNo": "1198609522000001",
+                "userNo": "000001",
+                "userName": "ubcn테스트사원",
+                "vm": "50000",
+                "grade": "0",
+                "validity": "1",
+            }
+        ],
+        "result_code": "0000",
+        "result_msg": "정상처리",
+    }
+    ```
+</Frame>
 
 ## 사용자 정보 등록
 <Frame>
 ### Request Schema
-요청에서 필요로 하는 필드는 다음과 같습니다.
+요청에서 필요로 하는 필드는 다음과 같습니다. 객체 리스트를 통해 2명 이상의 사용자를 등록할 수 있습니다.
 <Table
     headers={[{"title": "필드명"}, {"subTitle": "상세필드명"}, {"notNull": "필수"},
         {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
