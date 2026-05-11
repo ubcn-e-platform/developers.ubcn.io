@@ -1,0 +1,32 @@
+---
+layout: /src/layouts/release-notes/Layout.astro
+title: 2026-05-11 업데이트
+releasedAt: 2026-05-11
+writtenAt: 2026-05-11
+---
+
+import Frame from "/src/components/Frame.astro";
+import Figure from "/src/components/Figure.astro";
+import purchaseCancelRequest from "./_assets/20260511-01.png";
+import purchaseCancelCompletion from "./_assets/20260511-02.png";
+
+## VMMS 업데이트
+
+<Frame>
+    ### 거래내역
+    거래내역 내 `매입취소 요청` 결과 를 더 편리하게 확인 가능 하도록 변경했어요
+    - 매입 취소 정상 요청 시 <code style="color: #eab308;">노란색</code>, 매입취소 완료 시 `빨간색`으로 표시 돼요.
+
+    <br/>
+    **☝️ 이미지를 클릭 시 확대되어 자세히 확인하실 수 있어요!**
+        <Figure
+            src={purchaseCancelRequest}
+            caption={"정상 매입 취소 요청 상태"}
+            width={1500}
+        />
+        <Figure
+            src={purchaseCancelCompletion}
+            caption={"정상 매입 취소 완료 상태"}
+            width={1500}
+        />
+</Frame>
