@@ -20,7 +20,7 @@ import Table from "/src/components/Table.astro";
 <b>거래내역 조회는 `일 단위`로 가능합니다.</b>
 </Frame>
 
-## 거래내역 조회
+## 일일 거래내역 조회
 <Frame>
     ### Request Schema
     요청에서 필요로 하는 필드는 다음과 같습니다.
@@ -96,95 +96,84 @@ import Table from "/src/components/Table.astro";
                 {"subTitle": "-"},
                 {"notNull": "Y"},
                 {"argsType": "Array"},
-                {"desc": "조회된 리스트 (거래내역 배열)"},
+                {"desc": "조회된 거래내역 리스트"},
                 {"etc": "객체 리스트"},
             ],
-        ]}>
-    </Table>
-</Frame>
-
-<Frame>
-    ### foundList 내부 필드 설명
-    foundList는 거래내역의 배열로, 내부 객체는 다음과 같은 필드를 포함합니다.
-    <Table
-        headers={[{"title": "필드명"}, {"subTitle": "상세필드명"}, {"notNull": "필수"},
-            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
-        bodys={[
             [
-                {"title": "tranDate"},
-                {"subTitle": "-"},
+                {"title": "foundList"},
+                {"subTitle": "tranDate"},
                 {"notNull": "Y"},
                 {"argsType": "String"},
                 {"desc": "거래일자"},
                 {"etc": "YYYYMMDD"},
             ],
             [
-                {"title": "tsType"},
-                {"subTitle": "-"},
+                {"title": "foundList"},
+                {"subTitle": "tsType"},
                 {"notNull": "Y"},
                 {"argsType": "String"},
                 {"desc": "사용이력 구분"},
                 {"etc": "-"},
             ],
             [
-                {"title": "tsNo"},
-                {"subTitle": "-"},
+                {"title": "foundList"},
+                {"subTitle": "tsNo"},
                 {"notNull": "Y"},
                 {"argsType": "String"},
                 {"desc": "거래번호"},
                 {"etc": "-"},
             ],
             [
-                {"title": "terminalID"},
-                {"subTitle": "-"},
+                {"title": "foundList"},
+                {"subTitle": "terminalID"},
                 {"notNull": "Y"},
                 {"argsType": "String"},
                 {"desc": "단말기 ID"},
                 {"etc": "-"},
             ],
             [
-                {"title": "cardNo"},
-                {"subTitle": "-"},
+                {"title": "foundList"},
+                {"subTitle": "cardNo"},
                 {"notNull": "Y"},
                 {"argsType": "String"},
                 {"desc": "카드번호"},
                 {"etc": "-"},
             ],
             [
-                {"title": "vmOut"},
-                {"subTitle": "-"},
+                {"title": "foundList"},
+                {"subTitle": "vmOut"},
                 {"notNull": "Y"},
                 {"argsType": "String"},
                 {"desc": "복지금 사용액"},
                 {"etc": "-"},
             ],
             [
-                {"title": "vColumn"},
-                {"subTitle": "-"},
+                {"title": "foundList"},
+                {"subTitle": "vColumn"},
                 {"notNull": "Y"},
                 {"argsType": "String"},
                 {"desc": "자판기컬럼"},
                 {"etc": "-"},
             ],
             [
-                {"title": "pName"},
-                {"subTitle": "-"},
+                {"title": "foundList"},
+                {"subTitle": "pName"},
                 {"notNull": "Y"},
                 {"argsType": "String"},
                 {"desc": "상품명"},
                 {"etc": "-"},
             ],
             [
-                {"title": "originDate"},
-                {"subTitle": "-"},
+                {"title": "foundList"},
+                {"subTitle": "originDate"},
                 {"notNull": "N"},
                 {"argsType": "String"},
                 {"desc": "취소 원거래일"},
                 {"etc": "-"},
             ],
             [
-                {"title": "originTsNo"},
-                {"subTitle": "-"},
+                {"title": "foundList"},
+                {"subTitle": "originTsNo"},
                 {"notNull": "N"},
                 {"argsType": "String"},
                 {"desc": "취소 원거래번호"},
@@ -192,27 +181,24 @@ import Table from "/src/components/Table.astro";
             ],
         ]}>
     </Table>
-</Frame>
-
-<Frame>
     ### Response JSON 예시
     ```json
     {
         "findCnt": 2,
         "foundList":[{
-            "tranDate": "20220927",
-            "tsType": "취소",
-            "tsNo": "4",
-            "terminalID": "2000011111",
-            "cardNo": "CARDubcn",
-            "vmOut": "0",
-            "vColumn": "01",
-            "pName": "상품명",
-            "originDate": "20220928",
-            "originTsNo": "1"
-        },{..}],
-            "result_code": "0000",
-            "result_msg": "Success"
+        "tranDate": "20220927",
+        "tsType": "취소",
+        "tsNo": "4",
+        "terminalID": "2000011111",
+        "cardNo": "CARDubcn",
+        "vmOut": "0",
+        "vColumn": "01",
+        "pName": "상품명",
+        "originDate": "20220928",
+        "originTsNo": "1"
+    },{..}],
+        "result_code": "0000",
+        "result_msg": "Success"
     }
     ```
 </Frame>

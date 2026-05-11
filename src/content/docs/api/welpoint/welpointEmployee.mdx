@@ -139,8 +139,88 @@ const API = axios.create({
             {"subTitle": "-"},
             {"notNull": "Y"},
             {"argsType": "Array"},
-            {"desc": "조회된 사원(사용자) 리스트"},
-            {"etc": "아래 foundList 내부 필드 설명 참조"},
+            {"desc": "조회된 사용자 리스트"},
+            {"etc": "객체 리스트"},
+        ],
+        [
+            {"title": "foundList"},
+            {"subTitle": "seq"},
+            {"notNull": "Y"},
+            {"argsType": "int"},
+            {"desc": "사용자의 SEQ"},
+            {"etc": "-"},
+        ],
+        [
+            {"title": "foundList"},
+            {"subTitle": "cseq"},
+            {"notNull": "Y"},
+            {"argsType": "String"},
+            {"desc": "고객사 SEQ"},
+            {"etc": "-"},
+        ],
+        [
+            {"title": "foundList"},
+            {"subTitle": "userCardNo"},
+            {"notNull": "Y"},
+            {"argsType": "String"},
+            {"desc": "카드번호"},
+            {"etc": "-"},
+        ],
+        [
+            {"title": "foundList"},
+            {"subTitle": "userNo"},
+            {"notNull": "Y"},
+            {"argsType": "String"},
+            {"desc": "사용자 식별번호"},
+            {"etc": "-"},
+        ],
+        [
+            {"title": "foundList"},
+            {"subTitle": "userName"},
+            {"notNull": "Y"},
+            {"argsType": "String"},
+            {"desc": "사용자 명"},
+            {"etc": "-"},
+        ],
+        [
+            {"title": "foundList"},
+            {"subTitle": "vm"},
+            {"notNull": "Y"},
+            {"argsType": "String"},
+            {"desc": "현재 포인트 잔액"},
+            {"etc": "마이너스가 가능하여 String Type"},
+        ],
+        [
+            {"title": "foundList"},
+            {"subTitle": "todayUseCnt"},
+            {"notNull": "Y"},
+            {"argsType": "String"},
+            {"desc": "금일 사용 횟수"},
+            {"etc": "매 0시 초기화"},
+        ],
+        [
+            {"title": "foundList"},
+            {"subTitle": "todayUseAmt"},
+            {"notNull": "Y"},
+            {"argsType": "String"},
+            {"desc": "금일 사용 금액"},
+            {"etc": "매 0시 초기화"},
+        ],
+        [
+            {"title": "foundList"},
+            {"subTitle": "grade"},
+            {"notNull": "Y"},
+            {"argsType": "String"},
+            {"desc": "등급"},
+            {"etc": "현재 미사용 데이터"},
+        ],
+        [
+            {"title": "foundList"},
+            {"subTitle": "validity"},
+            {"notNull": "Y"},
+            {"argsType": "String"},
+            {"desc": "사용자 활성화 여부"},
+            {"etc": "1: 활성화, 0: 삭제상태"},
         ],
         [
             {"title": "result_msg"},
@@ -160,84 +240,6 @@ const API = axios.create({
         ],
     ]}>
 </Table>
-</Frame>
-
-<Frame>
-    ### foundList 내부 필드 설명
-    foundList는 사원(사용자)의 배열로, 내부 객체는 다음과 같은 필드를 포함합니다.
-    <Table
-        headers={[{"title": "필드명"}, {"subTitle": "상세필드명"}, {"notNull": "필수"},
-            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
-        bodys={[
-            [
-                {"title": "seq"},
-                {"subTitle": "-"},
-                {"notNull": "Y"},
-                {"argsType": "int"},
-                {"desc": "사용자의 SEQ"},
-                {"etc": "-"},
-            ],
-            [
-                {"title": "cseq"},
-                {"subTitle": "-"},
-                {"notNull": "Y"},
-                {"argsType": "String"},
-                {"desc": "고객사 SEQ"},
-                {"etc": "-"},
-            ],
-            [
-                {"title": "userCardNo"},
-                {"subTitle": "-"},
-                {"notNull": "Y"},
-                {"argsType": "String"},
-                {"desc": "카드번호"},
-                {"etc": "-"},
-            ],
-            [
-                {"title": "userNo"},
-                {"subTitle": "-"},
-                {"notNull": "Y"},
-                {"argsType": "String"},
-                {"desc": "사용자 식별번호"},
-                {"etc": "-"},
-            ],
-            [
-                {"title": "userName"},
-                {"subTitle": "-"},
-                {"notNull": "Y"},
-                {"argsType": "String"},
-                {"desc": "사용자 명"},
-                {"etc": "-"},
-            ],
-            [
-                {"title": "vm"},
-                {"subTitle": "-"},
-                {"notNull": "Y"},
-                {"argsType": "String"},
-                {"desc": "현재 포인트 잔액"},
-                {"etc": "마이너스가 가능하여 String Type"},
-            ],
-            [
-                {"title": "grade"},
-                {"subTitle": "-"},
-                {"notNull": "Y"},
-                {"argsType": "String"},
-                {"desc": "등급"},
-                {"etc": "현재 미사용 데이터"},
-            ],
-            [
-                {"title": "validity"},
-                {"subTitle": "-"},
-                {"notNull": "Y"},
-                {"argsType": "String"},
-                {"desc": "사용자 활성화 여부"},
-                {"etc": "1: 활성화, 0: 삭제상태"},
-            ],
-        ]}>
-    </Table>
-</Frame>
-
-<Frame>
     ### Response JSON 예시
     ```json
     {
@@ -250,6 +252,8 @@ const API = axios.create({
                 "userNo": "000001",
                 "userName": "ubcn테스트사원",
                 "vm": "50000",
+                "todayUseCnt": "1",
+                "todayUseAmt": "5000",
                 "grade": "0",
                 "validity": "1",
             }
@@ -273,53 +277,43 @@ const API = axios.create({
             {"subTitle": "-"},
             {"notNull": "Y"},
             {"argsType": "Array"},
-            {"desc": "등록하고자 하는 사원 Array"},
+            {"desc": "등록하고자 하는 사용자 리스트"},
             {"etc": "객체 리스트"},
+        ],
+        [
+            {"title": "employeeList"},
+            {"subTitle": "userCardNo"},
+            {"notNull": "Y"},
+            {"argsType": "String"},
+            {"desc": "사원 카드번호"},
+            {"etc": "최대 19자리"},
+        ],
+        [
+            {"title": "employeeList"},
+            {"subTitle": "userNo"},
+            {"notNull": "Y"},
+            {"argsType": "String"},
+            {"desc": "사원 번호"},
+            {"etc": "-"},
+        ],
+        [
+            {"title": "employeeList"},
+            {"subTitle": "vm"},
+            {"notNull": "Y"},
+            {"argsType": "String"},
+            {"desc": "초기 복지금액"},
+            {"etc": "-"},
+        ],
+        [
+            {"title": "employeeList"},
+            {"subTitle": "userName"},
+            {"notNull": "N"},
+            {"argsType": "String"},
+            {"desc": "사원 명"},
+            {"etc": "-"},
         ],
     ]}>
 </Table>
-
-#### employeeList 내부 필드 설명
-employeeList는 사원의 배열로, 내부 객체는 다음과 같은 필드를 포함합니다.
-    <Table
-        headers={[{"title": "필드명"}, {"subTitle": "상세필드명"}, {"notNull": "필수"},
-            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
-        bodys={[
-            [
-                {"title": "userCardNo"},
-                {"subTitle": "-"},
-                {"notNull": "Y"},
-                {"argsType": "String"},
-                {"desc": "사원 카드번호"},
-                {"etc": "최대 20자리"},
-            ],
-            [
-                {"title": "userNo"},
-                {"subTitle": "-"},
-                {"notNull": "Y"},
-                {"argsType": "String"},
-                {"desc": "사원 번호"},
-                {"etc": "-"},
-            ],
-            [
-                {"title": "vm"},
-                {"subTitle": "-"},
-                {"notNull": "Y"},
-                {"argsType": "String"},
-                {"desc": "초기 복지금액"},
-                {"etc": "-"},
-            ],
-            [
-                {"title": "userName"},
-                {"subTitle": "-"},
-                {"notNull": "N"},
-                {"argsType": "String"},
-                {"desc": "사원 명"},
-                {"etc": "-"},
-            ],
-        ]}>
-    </Table>
-
 
 ### 호출 구문
 ```ts
@@ -378,10 +372,74 @@ if (res.code != null) {
         [
             {"title": "failList"},
             {"subTitle": "-"},
-            {"notNull": "N"},
+            {"notNull": "Y"},
             {"argsType": "Array"},
-            {"desc": "실패 원인 Array"},
-            {"etc": "아래 failList 내부 필드 설명 참조"},
+            {"desc": "등록 실패 사용자 리스트"},
+            {"etc": "객체 리스트"},
+        ],
+        [
+            {"title": "failList"},
+            {"subTitle": "seq"},
+            {"notNull": "N"},
+            {"argsType": "String"},
+            {"desc": "seq"},
+            {"etc": ""},
+        ],
+        [
+            {"title": "failList"},
+            {"subTitle": "userNo"},
+            {"notNull": "N"},
+            {"argsType": "String"},
+            {"desc": "사원번호"},
+            {"etc": ""},
+        ],
+        [
+            {"title": "failList"},
+            {"subTitle": "cSeq"},
+            {"notNull": "N"},
+            {"argsType": "String"},
+            {"desc": "고객사SEQ"},
+            {"etc": ""},
+        ],
+        [
+            {"title": "failList"},
+            {"subTitle": "userCardNo"},
+            {"notNull": "N"},
+            {"argsType": "String"},
+            {"desc": "사원카드번호"},
+            {"etc": ""},
+        ],
+        [
+            {"title": "failList"},
+            {"subTitle": "userName"},
+            {"notNull": "N"},
+            {"argsType": "String"},
+            {"desc": "사원명"},
+            {"etc": ""},
+        ],
+        [
+            {"title": "failList"},
+            {"subTitle": "vm"},
+            {"notNull": "N"},
+            {"argsType": "String"},
+            {"desc": "복지금액"},
+            {"etc": ""},
+        ],
+        [
+            {"title": "failList"},
+            {"subTitle": "grade"},
+            {"notNull": "N"},
+            {"argsType": "String"},
+            {"desc": "사원등급"},
+            {"etc": ""},
+        ],
+        [
+            {"title": "failList"},
+            {"subTitle": "validity"},
+            {"notNull": "N"},
+            {"argsType": "String"},
+            {"desc": "실패사유"},
+            {"etc": ""},
         ],
         [
             {"title": "result_code"},
@@ -401,80 +459,6 @@ if (res.code != null) {
         ],
     ]}>
 </Table>
-
-    #### failList 내부 필드 설명
-    failList 실패한 요청 파라미터와 실패 사유를 나타내는 배열로, 내부 객체는 다음과 같은 필드를 포함합니다.
-    <Table
-        headers={[{"title": "필드명"}, {"subTitle": "상세필드명"}, {"notNull": "필수"},
-            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
-        bodys={[
-            [
-                {"title": "seq"},
-                {"subTitle": "-"},
-                {"notNull": "N"},
-                {"argsType": "String"},
-                {"desc": "seq"},
-                {"etc": ""},
-            ],
-            [
-                {"title": "userNo"},
-                {"subTitle": "-"},
-                {"notNull": "N"},
-                {"argsType": "String"},
-                {"desc": "사원번호"},
-                {"etc": ""},
-            ],
-            [
-                {"title": "cSeq"},
-                {"subTitle": "-"},
-                {"notNull": "N"},
-                {"argsType": "String"},
-                {"desc": "고객사SEQ"},
-                {"etc": ""},
-            ],
-            [
-                {"title": "userCardNo"},
-                {"subTitle": "-"},
-                {"notNull": "N"},
-                {"argsType": "String"},
-                {"desc": "사원카드번호"},
-                {"etc": ""},
-            ],
-            [
-                {"title": "userName"},
-                {"subTitle": "-"},
-                {"notNull": "N"},
-                {"argsType": "String"},
-                {"desc": "사원명"},
-                {"etc": ""},
-            ],
-            [
-                {"title": "vm"},
-                {"subTitle": "-"},
-                {"notNull": "N"},
-                {"argsType": "String"},
-                {"desc": "복지금액"},
-                {"etc": ""},
-            ],
-            [
-                {"title": "grade"},
-                {"subTitle": "-"},
-                {"notNull": "N"},
-                {"argsType": "String"},
-                {"desc": "사원등급"},
-                {"etc": ""},
-            ],
-            [
-                {"title": "validity"},
-                {"subTitle": "-"},
-                {"notNull": "N"},
-                {"argsType": "String"},
-                {"desc": "실패사유"},
-                {"etc": ""},
-            ],
-        ]}>
-    </Table>
-
 </Frame>
 
 ## 사용자 정보 변경
@@ -491,7 +475,7 @@ if (res.code != null) {
             {"notNull": "Y"},
             {"argsType": "String"},
             {"desc": "사원 SEQ"},
-            {"etc": "-"},
+            {"etc": "`사용자 정보 조회` API를 통해 수정하고자 하는 사원의 SEQ 확인"},
         ],
         [
             {"title": "userCardNo"},
@@ -499,7 +483,7 @@ if (res.code != null) {
             {"notNull": "Y"},
             {"argsType": "String"},
             {"desc": "사원 카드번호"},
-            {"etc": "최대 19자리"},
+            {"etc": "입력한 값으로 카드번호가 변경됩니다. 최대 19자리"},
         ],
         [
             {"title": "userNo"},
@@ -507,7 +491,7 @@ if (res.code != null) {
             {"notNull": "Y"},
             {"argsType": "String"},
             {"desc": "사원 번호"},
-            {"etc": "-"},
+            {"etc": "입력한 값으로 사원 번호가 변경됩니다."},
         ],
         [
             {"title": "userName"},
@@ -515,7 +499,7 @@ if (res.code != null) {
             {"notNull": "N"},
             {"argsType": "String"},
             {"desc": "사원명"},
-            {"etc": "-"},
+            {"etc": "입력한 값으로 사원명이 변경됩니다."},
         ],
         [
             {"title": "vm"},
