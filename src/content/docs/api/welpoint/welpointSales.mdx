@@ -8,16 +8,17 @@ sidebar:
 #        variant: tip
 description: 웰포인트 거래와 관련된 API 기능을 제공합니다.
 releasedAt: 2025-01-17
-writtenAt: 2025-01-17
+writtenAt: 2026-05-12
 ---
 
 import Frame from "/src/components/Frame.astro";
 import Table from "/src/components/Table.astro";
 
 <Frame>
-웰포인트 API를 이용하여 거래내역을 요청 할 수 있습니다. 서비스 테스트를 위해서는 API 호출이 필요합니다.
+웰포인트 API를 이용하여 거래내역을 요청 할 수 있습니다. 서비스 테스트를 위해서는 API 호출이 필요합니다.<br/>
+거래내역을 포함하여 충전이력이 함께 응답됩니다.<br/>
 
-<b>거래내역 조회는 `일 단위`로 가능합니다.</b>
+<b>거래내역 조회는 `일 단위`, `카드번호`, `단말기ID`, `일자 범위`로 조회가 가능합니다.</b>
 </Frame>
 
 ## 일일 거래내역 조회
@@ -121,7 +122,7 @@ import Table from "/src/components/Table.astro";
                 {"notNull": "Y"},
                 {"argsType": "String"},
                 {"desc": "거래번호"},
-                {"etc": "-"},
+                {"etc": "`VM999`의 경우 충전을 의미"},
             ],
             [
                 {"title": "foundList"},
@@ -169,7 +170,7 @@ import Table from "/src/components/Table.astro";
                 {"notNull": "N"},
                 {"argsType": "String"},
                 {"desc": "취소 원거래일"},
-                {"etc": "-"},
+                {"etc": "취소된 거래일 때 원거래 날짜 표기"},
             ],
             [
                 {"title": "foundList"},
@@ -177,7 +178,7 @@ import Table from "/src/components/Table.astro";
                 {"notNull": "N"},
                 {"argsType": "String"},
                 {"desc": "취소 원거래번호"},
-                {"etc": "-"},
+                {"etc": "취소된 거래일 때 원거래 날짜 표기"},
             ],
         ]}>
     </Table>
@@ -194,11 +195,148 @@ import Table from "/src/components/Table.astro";
         "vmOut": "0",
         "vColumn": "01",
         "pName": "상품명",
-        "originDate": "20220928",
-        "originTsNo": "1"
+        "originDate": "null",
+        "originTsNo": "null"
     },{..}],
         "result_code": "0000",
         "result_msg": "Success"
     }
     ```
 </Frame>
+
+## 일일 거래내역 조회 (카드번호)
+<Frame>
+    ### Request Schema
+    요청에서 필요로 하는 필드는 다음과 같습니다.
+    <Table
+        headers={[{"title": "필드명"}, {"subTitle": "상세필드명"}, {"notNull": "필수"},
+            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
+        bodys={[
+            [
+                {"title": "date"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "거래일자"},
+                {"etc": `일자 규격은 'YYYYMMDD'를 따름.`},
+            ],
+            [
+                {"title": "cardNo"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "카드번호"},
+                {"etc": "-"},
+            ],
+        ]}>
+    </Table>
+    ### 호출구문
+    ```ts
+    const API = axios.create({
+            baseURL: `http://api.ubcn.co.kr/api`,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "PER-ID": "{유출금지}",
+                "PER-TOKEN": "{유출금지}",
+            },
+    });
+
+    // {date}는 "YYYYMMDD" 규격, {cardNo}는 카드번호를 따릅니다.
+    const res = await API.post("/well/sales/{date}/card/{cardNo}");
+    console.log(res.data);
+    ```
+    <br/>
+    <b>※ 응답 규격 및 예시는 상단의 [일일 거래내역 조회]와 동일합니다.</b>
+</Frame>
+
+## 일일 거래내역 조회 (단말기ID)
+<Frame>
+    ### Request Schema
+    요청에서 필요로 하는 필드는 다음과 같습니다.
+    <Table
+        headers={[{"title": "필드명"}, {"subTitle": "상세필드명"}, {"notNull": "필수"},
+            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
+        bodys={[
+            [
+                {"title": "date"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "거래일자"},
+                {"etc": `일자 규격은 'YYYYMMDD'를 따름.`},
+            ],
+            [
+                {"title": "terminalId"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "단말기 ID"},
+                {"etc": "-"},
+            ],
+        ]}>
+    </Table>
+    ### 호출구문
+    ```ts
+    const API = axios.create({
+            baseURL: `http://api.ubcn.co.kr/api`,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "PER-ID": "{유출금지}",
+                "PER-TOKEN": "{유출금지}",
+            },
+    });
+
+    // {date}는 "YYYYMMDD" 규격, {terminalId}는 단말기 ID를 따릅니다.
+    const res = await API.post("/well/sales/{date}/terminal/{terminalId}");
+    console.log(res.data);
+    ```
+    <br/>
+    <b>※ 응답 규격 및 예시는 상단의 [일일 거래내역 조회]와 동일합니다.</b>
+</Frame>
+
+## 거래내역 일자범위 조회
+<Frame>
+    ### Request Schema
+    요청에서 필요로 하는 필드는 다음과 같습니다.
+    <Table
+        headers={[{"title": "필드명"}, {"subTitle": "상세필드명"}, {"notNull": "필수"},
+            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
+        bodys={[
+            [
+                {"title": "startDate"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "시작일자"},
+                {"etc": `일자 규격은 'YYYYMMDD'를 따름.`},
+            ],
+            [
+                {"title": "endDate"},
+                {"subTitle": "-"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "종료일자"},
+                {"etc": `일자 규격은 'YYYYMMDD'를 따름.`},
+            ],
+        ]}>
+    </Table>
+    ### 호출구문
+    ```ts
+    const API = axios.create({
+            baseURL: `http://api.ubcn.co.kr/api`,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "PER-ID": "{유출금지}",
+                "PER-TOKEN": "{유출금지}",
+            },
+    });
+
+    // {startDate}, {endDate}는 "YYYYMMDD" 규격을 따릅니다.
+    // 최대 1개월 범위 조회를 지원합니다.
+    const res = await API.post("/well/sales/range/{startDate}/{endDate}");
+    console.log(res.data);
+    ```
+    <br/>
+    <b>※ 응답 규격 및 예시는 상단의 [일일 거래내역 조회]와 동일합니다.</b>
+</Frame>
+
