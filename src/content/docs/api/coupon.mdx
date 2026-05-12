@@ -6,7 +6,7 @@ sidebar:
 #    badge:
 #        text: New
 #        variant: tip
-description: 쿠폰과 관련된 API 기능을 제공합니다.
+description: ""
 releasedAt: 2024-08-14
 writtenAt: 2024-08-14
 ---
@@ -15,8 +15,27 @@ import Frame from "/src/components/Frame.astro";
 import Table from "/src/components/Table.astro";
 
 <Frame>
-각 사이트에 등록된 정보를 바탕으로 쿠폰을 발권하고, 발권된 쿠폰의 상태에 대해 수정을 할 수 있습니다.
-<br/>
+#### 서비스 소개
+`QR코드` 또는 `바코드`를 이용해 단말기를 이용할 수 있는 쿠폰서비스 입니다.
+
+해당 문서에서는 쿠폰의 `발권`과 `상태` 를 관리하는 방법을 안내합니다.
+
+#### 전제 조건
+쿠폰 API를 사용하기 위해서는 아래 조건을 모두 충족해야 합니다.
+- 유비씨엔과 쿠폰 서비스 계약 체결(VMMS 서비스 이용 계약)
+    - BIZ 전산 사업자 등록
+    - BIZ 단말기 등록
+    - VMMS 소속 등록
+        - 소속 관리 > 쿠폰시스템 사용
+    - VMMS 계정 가입
+    - VMMS 단말기 등록
+    - 쿠폰 그룹 등록
+    - 쿠폰 계정 가입(VMMS 계정과 동일한 계정으로 가입)
+- 단말기
+        - QR 코드 리더기가 장착된 단말기
+        - 외부망 인터넷 통신이 되는 단말기
+
+#### 전송방식
 쿠폰의 전송 방식은 기본적으로 `알림톡` 으로 전송되며, 카카오톡의 버전이 낮거나 미사용자 또는 채널 차단 등\
 고객의 사정에 의해 `알림톡`을 받을 수 없는 경우 `MMS`로 대체 전송됩니다.
 <br/>
@@ -25,15 +44,13 @@ import Table from "/src/components/Table.astro";
     + `알림톡` : 12코인
     + `MMS` : 70코인
 </Frame>
-<br/>
 
-## 기본 호출 구문
+## Header
 <Frame>
 ```ts
 const API = axios.create({
     baseURL: `http://api.ubcn.co.kr/membership/coupon`,
     headers: {
-        "Access-Control-Allow-Origin": "*",
         "company": "{company}",
         "token"  : "{token}",
     },
@@ -41,73 +58,14 @@ const API = axios.create({
 ```
 </Frame>
 
-## ✔️계정 조회하기
-단말기 ID 를 통해 단말기 ID 와 매칭된 계정을 조회할 수 있습니다.
-<br/>
-<strong style={"color: green"}>GET</strong> /user/search/tid/`{tid}`
-<Frame>
-```ts
-    //유비씨엔(주)에서 제공하는 단말기 ID를 기준으로 사용자 계정 정보를 조회합니다.
-    const res = await API.get("/user/search/tid/{tid}");
-```
-</Frame>
-<Frame>
-    ### 📤Request Schema
-    <Table
-        headers={[{"title": "필드명"}, {"notNull": "필수"},
-            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
-        bodys={
-            [
-                [
-                    {"title": "tid"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "단말기 ID"},
-                    {"etc": "-"},
-                ]
-            ]
-        }>
-    </Table>
-</Frame>
-<Frame>
-    ### 📥Response Schema
-    결과 값에 들어 있는 필드는 다음과 같습니다.
-    <Table
-        headers={[{"title": "필드명"},
-            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
-        bodys={
-            [
-                [
-                    {"title": "code"},
-                    {"argsType": "String"},
-                    {"desc": "API 결과코드"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "message"},
-                    {"argsType": "String"},
-                    {"desc": "사용자 ID"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "description"},
-                    {"argsType": "String"},
-                    {"desc": "결과문구 요약"},
-                    {"etc": "-"},
-                ],
-            ]
-        }>
-    </Table>
-</Frame>
-
-## ✔️쿠폰 발권하기
+## ✔️Payload - 쿠폰 발권(2안)
 <Frame>
     <strong style={"color: green"}>POST</strong> /issuance
     ```ts
     const res = await API.post("/issuance",
         {
-            "id": "test",
-            "tid": "2000012345",
+            "id": "test", (택 1)
+            "tid": "2000012345", (택 2)
             "type": "GIFT",
             "free": "Y",
             "amount": 10000,
@@ -136,14 +94,14 @@ const API = axios.create({
                     {"notNull": "Y"},
                     {"argsType": "String"},
                     {"desc": "사용자 ID(uid)"},
-                    {"etc": "id 또는 tid 둘 중 하나는 필수"},
+                    {"etc": "택 1"},
                 ],
                 [
                     {"title": "tid"},
                     {"notNull": "Y"},
                     {"argsType": "String"},
                     {"desc": "단말기 ID(tid)"},
-                    {"etc": "id 또는 tid 둘 중 하나는 필수"},
+                    {"etc": "택 2"},
                 ],
                 [
                     {"title": "type"},
@@ -245,7 +203,7 @@ const API = axios.create({
            }>
     </Table>
 </Frame>
-## ✔️쿠폰 조회하기
+## ✔️Payload - 쿠폰 조회하기
 발권된 쿠폰의 현재 상태를 조회할 수 있습니다.
 <br/>
 <strong style={"color: green"}>GET</strong> /`{couponNo}`/type/`{type}`/`{id}`
@@ -375,7 +333,7 @@ const API = axios.create({
            }>
     </Table>
 </Frame>
-## ✔️쿠폰 수정하기
+## ✔️Payload - 쿠폰 수정하기
 발권된 쿠폰의 상태를 수정할 수 있습니다.
 <br/>
 <strong style={"color: green"}>PATCH</strong> /`{couponNo}`/type/`{type}`/`{id}`/status/`{couponStatus}`
@@ -449,5 +407,64 @@ const API = axios.create({
                    ],
                ]
            }>
+    </Table>
+</Frame>
+
+## ✔️Payload - 단말기 ID로 계정 조회하기
+단말기 ID 를 통해 단말기 ID 와 매칭된 계정을 조회할 수 있습니다.
+<br/>
+<strong style={"color: green"}>GET</strong> /user/search/tid/`{tid}`
+<Frame>
+```ts
+    //유비씨엔(주)에서 제공하는 단말기 ID를 기준으로 사용자 계정 정보를 조회합니다.
+    const res = await API.get("/user/search/tid/{tid}");
+```
+</Frame>
+<Frame>
+    ### 📤Request Schema
+    <Table
+        headers={[{"title": "필드명"}, {"notNull": "필수"},
+            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
+        bodys={
+            [
+                [
+                    {"title": "tid"},
+                    {"notNull": "Y"},
+                    {"argsType": "String"},
+                    {"desc": "단말기 ID"},
+                    {"etc": "-"},
+                ]
+            ]
+        }>
+    </Table>
+</Frame>
+<Frame>
+    ### 📥Response Schema
+    결과 값에 들어 있는 필드는 다음과 같습니다.
+    <Table
+        headers={[{"title": "필드명"},
+            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
+        bodys={
+            [
+                [
+                    {"title": "code"},
+                    {"argsType": "String"},
+                    {"desc": "API 결과코드"},
+                    {"etc": "-"},
+                ],
+                [
+                    {"title": "message"},
+                    {"argsType": "String"},
+                    {"desc": "사용자 ID"},
+                    {"etc": "-"},
+                ],
+                [
+                    {"title": "description"},
+                    {"argsType": "String"},
+                    {"desc": "결과문구 요약"},
+                    {"etc": "-"},
+                ],
+            ]
+        }>
     </Table>
 </Frame>
