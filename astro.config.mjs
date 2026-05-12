@@ -41,21 +41,6 @@ export default defineConfig({
                             collapsed: true
                         },
                         {
-                            label: '2026년 1월',
-                            autogenerate: {directory: 'release-notes/2026-01'},
-                            collapsed: true
-                        },
-                        {
-                            label: '2026년 2월',
-                            autogenerate: {directory: 'release-notes/2026-02'},
-                            collapsed: true
-                        },
-                        {
-                            label: '2026년 3월',
-                            autogenerate: {directory: 'release-notes/2026-03'},
-                            collapsed: true
-                        },
-                        {
                             label: '2026년 4월',
                             autogenerate: {directory: 'release-notes/2026-04'},
                             collapsed: true
@@ -87,7 +72,11 @@ export default defineConfig({
                                     collapsed: true,
                                     autogenerate: {directory: 'api/welpoint'},
                                 },
-                                {label: '쿠폰', slug: 'api/coupon'},
+                                {
+                                    label: '쿠폰',
+                                    collapsed: true,
+                                    autogenerate: {directory: 'api/coupon'},
+                                },
                                 {label: '서비스코인', slug: 'api/servicecoin'},
                             ],
                         },
