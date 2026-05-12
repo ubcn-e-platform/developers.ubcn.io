@@ -1,0 +1,63 @@
+---
+layout: /src/layouts/api/Layout.astro
+title: 서비스 소개
+sidebar:
+    order: 0
+#    badge:
+#        text: New
+#        variant: tip
+description: ""
+releasedAt: 2024-08-14
+writtenAt: 2024-08-14
+---
+
+import Frame from "/src/components/Frame.astro";
+
+<Frame>
+    `QR코드` 또는 `바코드`를 이용해 단말기를 이용할 수 있는 쿠폰서비스 입니다.
+
+해당 문서에서는 쿠폰의 `발권`과 `상태` 를 관리하는 방법을 안내합니다.
+</Frame>
+
+<Frame>
+## 전제 조건
+쿠폰 API를 사용하기 위해서는 아래 조건을 모두 충족해야 합니다.
+- 유비씨엔과 쿠폰 서비스 계약 체결(VMMS 서비스 이용 계약)
+    - BIZ 전산 사업자 등록
+    - BIZ 단말기 등록
+    - VMMS 소속 등록
+        - 소속 관리 > 쿠폰시스템 사용
+    - VMMS 계정 가입
+    - VMMS 단말기 등록
+    - 쿠폰 그룹 등록
+    - 쿠폰 계정 가입(VMMS 계정과 동일한 계정으로 가입)
+- 단말기
+        - QR 코드 리더기가 장착된 단말기
+        - 외부망 인터넷 통신이 되는 단말기
+</Frame>
+
+<Frame>
+## 전송방식
+쿠폰 발권 시 `알림톡` 을 기본으로 전송합니다.
+
+단, 카카오톡 미사용자, 카카오톡의 버전이 낮거나  채널 차단 등\
+고객의 사정에 의해 `알림톡`을 수신할 수 없는 경우 `MMS`로 전송됩니다.
+<br/>
+
+<strong>*API 계약</strong>을 별도로 맺지 않은 경우, 쿠폰 발송 1건 당 아래와 같이 `코인`이 차감됩니다.
+    + `알림톡` : 12코인
+    + `MMS` : 70코인
+</Frame>
+
+## 공통 Header
+<Frame>
+```ts
+const API = axios.create({
+    baseURL: `http://api.ubcn.co.kr/membership/coupon`,
+    headers: {
+        "company": "{company}",
+        "token"  : "{token}",
+    },
+});
+```
+</Frame>

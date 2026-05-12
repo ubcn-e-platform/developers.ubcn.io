@@ -1,0 +1,79 @@
+---
+layout: /src/layouts/api/Layout.astro
+title: 계정 찾기
+sidebar:
+    order: 5
+#    badge:
+#        text: New
+#        variant: tip
+description: ""
+releasedAt: 2024-08-14
+writtenAt: 2024-08-14
+---
+
+import Frame from "/src/components/Frame.astro";
+import Table from "/src/components/Table.astro";
+
+<Frame>
+#### 서비스 소개
+단말기 ID 로 계정을 찾는 API 입니다.
+</Frame>
+
+## ✔️Payload - 단말기 ID로 계정 조회하기
+단말기 ID 를 통해 단말기 ID 와 매칭된 계정을 조회할 수 있습니다.
+<br/>
+<strong style={"color: green"}>GET</strong> /user/search/tid/`{tid}`
+<Frame>
+```ts
+    //유비씨엔(주)에서 제공하는 단말기 ID를 기준으로 사용자 계정 정보를 조회합니다.
+    const res = await API.get("/user/search/tid/{tid}");
+```
+</Frame>
+<Frame>
+    ### 📤Request Schema
+    <Table
+        headers={[{"title": "필드명"}, {"notNull": "필수"},
+            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
+        bodys={
+            [
+                [
+                    {"title": "tid"},
+                    {"notNull": "Y"},
+                    {"argsType": "String"},
+                    {"desc": "단말기 ID"},
+                    {"etc": "-"},
+                ]
+            ]
+        }>
+    </Table>
+</Frame>
+<Frame>
+    ### 📥Response Schema
+    결과 값에 들어 있는 필드는 다음과 같습니다.
+    <Table
+        headers={[{"title": "필드명"},
+            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
+        bodys={
+            [
+                [
+                    {"title": "code"},
+                    {"argsType": "String"},
+                    {"desc": "API 결과코드"},
+                    {"etc": "-"},
+                ],
+                [
+                    {"title": "message"},
+                    {"argsType": "String"},
+                    {"desc": "사용자 ID"},
+                    {"etc": "-"},
+                ],
+                [
+                    {"title": "description"},
+                    {"argsType": "String"},
+                    {"desc": "결과문구 요약"},
+                    {"etc": "-"},
+                ],
+            ]
+        }>
+    </Table>
+</Frame>

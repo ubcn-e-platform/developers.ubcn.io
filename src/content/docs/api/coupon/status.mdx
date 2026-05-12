@@ -1,0 +1,97 @@
+---
+layout: /src/layouts/api/Layout.astro
+title: 상태수정
+sidebar:
+    order: 3
+#    badge:
+#        text: New
+#        variant: tip
+description: ""
+releasedAt: 2024-08-14
+writtenAt: 2024-08-14
+---
+
+import Frame from "/src/components/Frame.astro";
+import Table from "/src/components/Table.astro";
+
+<Frame>
+#### 서비스 소개
+해당 문서에서는 발권된 쿠폰의 `상태수정`을 설명합니다.
+</Frame>
+
+## ✔️Payload - 쿠폰 수정하기
+발권된 쿠폰의 상태를 수정할 수 있습니다.
+<br/>
+<strong style={"color: green"}>PATCH</strong> /`{couponNo}`/type/`{type}`/`{id}`/status/`{couponStatus}`
+<Frame>
+    ```ts
+    const res = await API.get("/{couponNo}/type/{type}/{id}/status/{couponStatus}");
+    ```
+</Frame>
+<Frame>
+    ### 📤Request Schema
+    <Table headers={[{"title": "필드명"}, {"notNull": "필수"},
+        {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
+           bodys={
+               [
+                   [
+                       {"title": "couponNo"},
+                       {"notNull": "Y"},
+                       {"argsType": "String"},
+                       {"desc": "쿠폰번호"},
+                       {"etc": "-"},
+                   ],
+                   [
+                       {"title": "type"},
+                       {"notNull": "Y"},
+                       {"argsType": "String"},
+                       {"desc": "인증타입"},
+                       {"etc": "사용자 ID: uid<br/>단말기 ID: tid"},
+                   ],
+                   [
+                       {"title": "id"},
+                       {"notNull": "Y"},
+                       {"argsType": "String"},
+                       {"desc": "고유 ID"},
+                       {"etc": "사용자 ID<br/>단말기 ID"},
+                   ],
+                   [
+                       {"title": "couponStatus"},
+                       {"notNull": "Y"},
+                       {"argsType": "String"},
+                       {"desc": "쿠폰상태"},
+                       {"etc": "N: 미사용<br/>L: 잠금<br/>D: 기간만료<br/>U: 사용완료<br/>H: 삭제"},
+                   ],
+               ]
+           }>
+    </Table>
+</Frame>
+<Frame>
+    ### 📥Response Schema
+    결과 값에 들어 있는 필드는 다음과 같습니다.
+    <Table headers={[{"title": "필드명"},
+        {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
+           bodys={
+               [
+                   [
+                       {"title": "code"},
+                       {"argsType": "String"},
+                       {"desc": "API 결과코드"},
+                       {"etc": "-"},
+                   ],
+                   [
+                       {"title": "message"},
+                       {"argsType": "String"},
+                       {"desc": "결과문구"},
+                       {"etc": "-"},
+                   ],
+                   [
+                       {"title": "description"},
+                       {"argsType": "String"},
+                       {"desc": "결과문구 요약"},
+                       {"etc": "-"},
+                   ],
+               ]
+           }>
+    </Table>
+</Frame>
