@@ -92,8 +92,8 @@ export default defineConfig({
                     link: '/faq'
                 },
                 {
-                    label: '웹 가이드',
-                    link: '/web'
+                    label: '서비스 운영 정책',
+                    link: '/policy'
                 },
             ],
         })
