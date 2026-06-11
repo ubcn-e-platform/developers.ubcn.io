@@ -7,6 +7,8 @@ writtenAt: 2026-06-10
 
 import Frame from "/src/components/Frame.astro";
 import Figure from "/src/components/Figure.astro";
+import img001 from "./_assets/20260610-01.png";
+import img002 from "./_assets/20260610-02.png";
 
 ## VMMS
 
@@ -43,6 +45,18 @@ import Figure from "/src/components/Figure.astro";
     - 변경) 상품명, 컬럼, 조직루트, 단말기명, 머신기코드 ...
 
     향후에는 집계단위 `컬럼별` 항목을 제거하고, 상품별 항목에 정렬 기능을 추가해 더욱 높은 편의성을 제공할 예정이에요.
+    <div className={"flex"}>
+        <Figure
+            src={img001}
+            caption={"기존) 상품별 목록"}
+            width={1500}
+        />
+        <Figure
+            src={img002}
+            caption={"변경) 상품별 목록"}
+            width={1500}
+        />
+    </div>
 </Frame>
 
 <Frame>
