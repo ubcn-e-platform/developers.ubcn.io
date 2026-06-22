@@ -180,6 +180,14 @@ import Table from "/src/components/Table.astro";
                 {"desc": "취소 원거래번호"},
                 {"etc": "취소된 거래일 때 원거래 날짜 표기"},
             ],
+            [
+                {"title": "foundList"},
+                {"subTitle": "approvalTime"},
+                {"notNull": "Y"},
+                {"argsType": "String"},
+                {"desc": "승인일자"},
+                {"etc": "yyyy-MM-dd HH:mm:ss.S"},
+            ],
         ]}>
     </Table>
     ### Response JSON 예시
@@ -196,7 +204,8 @@ import Table from "/src/components/Table.astro";
         "vColumn": "01",
         "pName": "상품명",
         "originDate": "null",
-        "originTsNo": "null"
+        "originTsNo": "null",
+        "approvalTime": "2022-09-27 13:36:17.0",
     },{..}],
         "result_code": "0000",
         "result_msg": "Success"
