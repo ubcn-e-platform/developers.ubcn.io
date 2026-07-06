@@ -1,0 +1,8 @@
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+
+@plugin "@tailwindcss/typography";
+
+@source "../content/**/*.{astro,html,js,jsx,md,mdx,ts,tsx}";
+@source "../layouts/**/*.{astro,html,js,jsx,md,mdx,ts,tsx}";
+@source "../components/**/*.{astro,html,js,jsx,md,mdx,ts,tsx}";
