@@ -24,14 +24,64 @@ hr {
 
 .level-h2 {
 	margin-top: 10px !important;
-	margin-bottom: 20px !important;
+	margin-bottom: 10px !important;
 }
 
 .level-h3 {
-	margin-top: 20px !important;
-	margin-bottom: 20px !important;
+	margin-top: 5px !important;
+	margin-bottom: 5px !important;
 }
 
 .hero {
 	display: none;
+}
+
+strong {
+	box-decoration-break: clone;
+	background: linear-gradient(#0000 58%, #fef08a 58%);
+	font-weight: 700;
+}
+
+.sl-markdown-content h1:not(:where(.not-content *)) {
+	font-size: var(--sl-text-h1);
+}
+
+.sl-markdown-content h2:not(:where(.not-content *)) {
+	font-size: var(--sl-text-h2);
+}
+
+.sl-markdown-content h3:not(:where(.not-content *)) {
+	font-size: var(--sl-text-h3);
+}
+
+.sl-markdown-content h4:not(:where(.not-content *)) {
+	font-size: var(--sl-text-h4);
+}
+
+.sl-markdown-content h5:not(:where(.not-content *)) {
+	font-size: var(--sl-text-h5);
+}
+
+h1 {
+  letter-spacing: -.021em !important;
+  font-weight: 600 !important;
+  scroll-margin-top: 5.2rem !important;
+}
+
+h2 {
+  letter-spacing: -.02em !important;
+  font-weight: 600 !important;
+  margin: 12px 0px !important;
+}
+
+h3 {
+  letter-spacing: -.018em !important;
+  font-weight: 600 !important;
+  color: #4e5968 !important;
+}
+
+h4 {
+  letter-spacing: -.018em !important;
+  font-weight: 600 !important;
+  color: #353841 !important;
 }
