@@ -15,6 +15,11 @@ starlight-theme-select {
   --pagefind-ui-border-radius: 8px;
   --pagefind-ui-image-border-radius: 8px;
   --pagefind-ui-image-box-ratio: 3 / 2;
+  --sl-text-h1: var(--sl-text-5xl);
+  --sl-text-h2: var(--sl-text-4xl);
+  --sl-text-h3: var(--sl-text-2xl);
+  --sl-text-h4: var(--sl-text-xl);
+  --sl-text-h5: var(--sl-text-lg);
 }
 
 
@@ -52,18 +57,6 @@ html, :host {
     justify-content: space-between;
     align-items: center;
     height: 100%;
-  }
-
-  @media (max-width: 767.99px) {
-    #category-group {
-      display: none;
-    }
-  }
-
-  @media ( max-width: 991.98px) {
-    #category-group {
-      display: none;
-    }
   }
 
   #category-group > a {
@@ -3087,6 +3080,28 @@ footer {
  }
 
 }
+@media (min-width: 992px) {
+  .lg\:block {
+      display: block;
+    }
+}
+@media (min-width: 1200px) {
+  .xl\:block {
+      display: block;
+    }
+}
+@media (max-width: 767.99px) {
+  #category-group {
+    display: none;
+  }
+}
+
+@media ( max-width: 991.98px) {
+  #category-group {
+    display: none;
+  }
+}
+
 .custom-page-move {
     color: #4e5968 !important;
     display: flex;

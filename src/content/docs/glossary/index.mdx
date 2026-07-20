@@ -15,19 +15,19 @@ import Frame from "/src/components/Frame.astro";
 
 <div>
     <Frame>
-        # 가나다순
+        # <strong>가나다순</strong>
         <div className="mb-6 text-gray-500">
             전산 및 결제 시스템에서 사용되는 용어를 가나다순으로 정리했어요.
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 mt-1 mb-8">
             <a href="/glossary/method/smartpay">간편결제</a>
             <a href="/glossary/payment/transaction">거래</a>
             <a href="/glossary/system/account">계정</a>
 
             <a href="/glossary/payment/confirmed-purchase">구매</a>
             <a href="/glossary/auth/permission">권한</a>
-            <a href="/glossary/organization/group">그룹(조직)</a>
+            <a href="/glossary/organization/group">그룹</a>
 
             <a href="/glossary/device/terminal">단말기</a>
             <a href="/glossary/system/log">로그 / 이력</a>
@@ -41,6 +41,7 @@ import Frame from "/src/components/Frame.astro";
             <a href="/glossary/system/batch">배치</a>
             <a href="/glossary/payment/welpoint">복지카드</a>
 
+            <a href="/glossary/organization/company">사업자</a>
             <a href="/glossary/organization/store">상점</a>
             <a href="/glossary/device/machine-status">상태정보</a>
             <a href="/glossary/product/product-code">상품코드</a>
@@ -61,7 +62,6 @@ import Frame from "/src/components/Frame.astro";
             <a href="/glossary/product/column">컬럼(슬롯)</a>
 
             <a href="/glossary/method/cash">현금 / 현금영수증(국세청 신고)</a>
-            <a href="/glossary/organization/company">사업자</a>
 
             <a href="/glossary/infrastructure/pg">PG(전자결제대행서비스)</a>
 
@@ -70,12 +70,12 @@ import Frame from "/src/components/Frame.astro";
     </Frame>
 
     <Frame>
-        # 카테고리
+        # <strong>카테고리</strong>
         <div className="mb-6 text-gray-500">
             전산 및 결제 시스템에서 사용되는 용어를 카테고리별로 정리했어요.
         </div>
-        ## 결제수단
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6">
+        ## <strong>결제수단</strong>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 my-1">
             <a href="/glossary/method/credit-card">신용 결제</a>
             <a href="/glossary/method/smartpay">간편결제</a>
             <a href="/glossary/method/prepaid">선불</a>
@@ -84,35 +84,38 @@ import Frame from "/src/components/Frame.astro";
             <a href="/glossary/method/collection">추가전송(수집)</a>
         </div>
         <hr/>
-        ## 가맹점
+        ## <strong>가맹점</strong>
         ### 조직
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 my-1">
             <a href="/glossary/organization/company">사업자</a>
-            <a href="/glossary/organization/chain">발주</a>
+            <a href="/glossary/organization/chain">체인</a>
         </div>
         <hr/>
-        ## 운영
+        ## <strong>운영</strong>
         ### 조직
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 my-1">
             <a href="/glossary/organization/chain">체인</a>
             <a href="/glossary/organization/store">상점</a>
         </div>
+        <hr/>
         ### 설정
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 my-1">
             <a href="/glossary/organization/group">그룹</a>
             <a href="/glossary/auth/permission">권한</a>
             <a href="/glossary/system/account">사용자</a>
         </div>
+        <hr/>
         ### 장비
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6">
-                    <a href="/glossary/device/terminal">단말기</a>
-                    <a href="/glossary/device/machine">머신기</a>
-                </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 my-1">
+            <a href="/glossary/device/terminal">단말기</a>
+            <a href="/glossary/device/machine">머신기</a>
+        </div>
+        <hr/>
         ### 상품
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6">
-                    <a href="/glossary/product/product">웹 상품</a>
-                    <a href="/glossary/product/product-code">상품코드</a>
-                </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 my-1">
+            <a href="/glossary/product/product">웹 상품</a>
+            <a href="/glossary/product/product-code">상품코드</a>
+        </div>
     </Frame>
 
     <hr/>
