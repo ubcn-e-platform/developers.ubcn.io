@@ -4,6 +4,7 @@ import Search from 'virtual:starlight/components/Search';
 import SiteTitle from 'virtual:starlight/components/SiteTitle';
 import { Icon } from '@astrojs/starlight/components';
 import '../styles/global.css';
+import "../../assets/styles/style.css";
 
 /**
  * Render the `Search` component if Pagefind is enabled or the default search component has been overridden.
@@ -13,7 +14,7 @@ const shouldRenderSearch =
 
 const pathName = Astro.url.pathname;
 ---
-<link rel="stylesheet" href="/src/assets/styles/style.css">
+
 <script>
   const today = new Date();
   today.setHours(0, 0, 0, 0); // 시간 제거

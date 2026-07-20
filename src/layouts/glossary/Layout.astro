@@ -1,6 +1,7 @@
 ---
 import Footer from '../../components/Footer.astro';
 import type {MarkdownLayoutProps} from "astro";
+import "../../assets/styles/glossary.css";
 
 interface Frontmatter {
 	title: string;
@@ -17,7 +18,6 @@ const {title, description, releasedAt, writtenAt} = frontmatter;
 const classList = frontmatter.title === "유비씨엔 용어사전" ? `hidden` : 'grid gap-2';
 ---
 
-<link rel="stylesheet" href="/src/assets/styles/glossary.css">
 <div class="px-4">
     <div>
         <div class={classList}>
