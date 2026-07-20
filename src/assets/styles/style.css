@@ -1,9 +1,318 @@
 @import url("pretendardvariable.css");
 
+/* =========================================================
+ * 기본 반응형 기준
+ *
+ * Mobile     : 0 ~ 767px
+ * MD         : 768px 이상  (48rem)
+ * Starlight  : 800px 이상  (50rem)
+ * LG         : 992px 이상  (62rem)
+ * Starlight XL: 1152px 이상 (72rem)
+ * XL         : 1200px 이상 (75rem)
+ * ========================================================= */
+
+
+/* =========================================================
+ * 모바일 전용
+ * 적용 범위: 0 ~ 767px
+ * ========================================================= */
+@media (max-width: 47.999rem) {
+  #category-group {
+    display: none;
+  }
+
+  starlight-menu-button {
+    display: block;
+  }
+}
+
+
+/* =========================================================
+ * 태블릿 이하
+ * 적용 범위: 0 ~ 991px
+ *
+ * 사이드바를 사용하지 않고 모바일 메뉴 버튼을 표시합니다.
+ * ========================================================= */
+@media (max-width: 61.999rem) {
+  .height {
+    max-height: 3.5rem;
+  }
+
+  :root {
+    /*
+     * 고정 좌측 사이드바가 아니라 오버레이 메뉴이므로
+     * 본문이 사이드바 자리를 미리 확보하지 않도록 함.
+     */
+    --sl-content-inline-start: 0rem !important;
+  }
+
+  starlight-menu-button {
+    display: block;
+  }
+
+  #category-group {
+    display: none;
+  }
+}
+
+
+/* =========================================================
+ * Starlight 기본 동작 보정 (800px ~ 991px)
+ * 적용 범위: 800px ~ 991px
+ *
+ * Starlight는 800px부터 .sidebar-pane을 "항상 보이는 고정 폭
+ * 사이드바"로 전환하지만, 이 구간에서는 992px 미만과 동일하게
+ * 햄버거 버튼으로 열고 닫는 전체화면 오버레이를 유지해야 함.
+ * ========================================================= */
+@media (min-width: 50rem) and (max-width: 61.999rem) {
+  .sidebar-pane {
+    --sl-sidebar-visibility: hidden;
+    visibility: hidden;
+    width: 100% !important;
+  }
+
+  [aria-expanded='true'] ~ .sidebar-pane {
+    --sl-sidebar-visibility: visible;
+    visibility: visible;
+  }
+}
+
+
+/* =========================================================
+ * MD 이상
+ * 적용 범위: 768px 이상
+ * ========================================================= */
+@media (min-width: 48rem) {
+  .md\:hidden {
+    display: none;
+  }
+
+  .md\:block {
+    display: block;
+  }
+
+  .md\:gap-6 {
+    gap: 1.5rem;
+  }
+
+  .md\:mb-16 {
+    margin-bottom: 4rem;
+  }
+
+  .md\:grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /*
+   * Blur utilities
+   */
+  .blur-xs {
+    filter: blur(4px);
+  }
+
+  .blur-sm {
+    filter: blur(8px);
+  }
+
+  .blur-md {
+    filter: blur(12px);
+  }
+
+  .blur-lg {
+    filter: blur(16px);
+  }
+
+  .blur-xl {
+    filter: blur(24px);
+  }
+
+  .blur-2xl {
+    filter: blur(40px);
+  }
+
+  .blur-3xl {
+    filter: blur(64px);
+  }
+
+  .blur-none {
+    filter: none;
+  }
+
+  /*
+   * 사이드바 메뉴 아이콘 및 배지 정렬
+   */
+  .sidebar-content .top-level li a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .new-badge {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.625rem;
+    background-color: #ff4d4f;
+    color: #fff;
+    font-size: 0.6875rem;
+    line-height: 1;
+  }
+}
+
+
+/* =========================================================
+ * Starlight 데스크톱 레이아웃
+ * 적용 범위: 800px 이상
+ * ========================================================= */
+@media (min-width: 50rem) {
+  :root {
+    --sl-nav-height: 3.5rem;
+    --sl-nav-pad-x: 1.5rem;
+  }
+
+  /*
+   * Starlight에서 사용하는 반응형 표시 클래스
+   * 기존 동작을 유지하기 위해 800px 이상에서 표시합니다.
+   */
+  .md\:sl-hidden {
+    display: block;
+  }
+
+  .sidebar-content::after {
+    display: block;
+  }
+
+  site-search button {
+    padding-inline: 0.75rem 0.5rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    background-color: var(--sl-color-black);
+    color: var(--sl-color-gray-2);
+    font-size: var(--sl-text-sm);
+  }
+
+  :global(:root[data-has-sidebar]) {
+    --__sidebar-pad: calc(2 * var(--sl-nav-pad-x));
+  }
+
+  :global(:root:not([data-has-toc])) {
+    --__toc-width: 0rem;
+  }
+
+  .pagefind-ui__search-input {
+    height: calc(64px * var(--pagefind-ui-scale));
+    padding:
+      0
+      calc(70px * var(--pagefind-ui-scale))
+      0
+      calc(54px * var(--pagefind-ui-scale));
+    border:
+      var(--pagefind-ui-border-width)
+      solid
+      var(--pagefind-ui-border);
+    border-radius: var(--pagefind-ui-border-radius);
+    background-color: var(--pagefind-ui-background);
+    font-size: calc(21px * var(--pagefind-ui-scale));
+  }
+
+  .header {
+    --__sidebar-width:
+      max(
+        0rem,
+        var(--sl-content-inline-start, 0rem) - var(--sl-nav-pad-x)
+      );
+
+    --__main-column-fr:
+      calc(
+        (
+          100%
+          + var(--__sidebar-pad, 0rem)
+          - var(--__toc-width, var(--sl-sidebar-width))
+          - (2 * var(--__toc-width, var(--sl-nav-pad-x)))
+          - var(--sl-content-inline-start, 0rem)
+          - var(--sl-content-width)
+        ) / 2
+      );
+
+    display: grid;
+    grid-template-columns:
+      minmax(
+        calc(
+          var(--__sidebar-width)
+          + max(
+            0rem,
+            var(--__main-column-fr) - var(--sl-nav-gap)
+          )
+        ),
+        auto
+      )
+      auto
+      auto;
+    align-content: center;
+  }
+}
+
+
+/* =========================================================
+ * LG 이상
+ * 적용 범위: 992px 이상
+ *
+ * 데스크톱에서는 사이드바를 복원하고
+ * 모바일 메뉴 버튼을 숨깁니다.
+ * ========================================================= */
+@media (min-width: 62rem) {
+  :root {
+    --sl-sidebar-width: 18.75rem;
+  }
+
+  .lg\:block {
+    display: block;
+  }
+
+  starlight-menu-button {
+    display: none;
+  }
+
+  #category-group {
+    display: block;
+  }
+}
+
+
+/* =========================================================
+ * Starlight 대형 데스크톱 레이아웃
+ * 적용 범위: 1152px 이상
+ * ========================================================= */
+@media (min-width: 72rem) {
+  :root {
+    --sl-content-pad-x: 1.5rem;
+    --sl-mobile-toc-height: 0rem;
+  }
+}
+
+
+/* =========================================================
+ * XL 이상
+ * 적용 범위: 1200px 이상
+ * ========================================================= */
+@media (min-width: 75rem) {
+  .xl\:block {
+    display: block;
+  }
+}
+
 starlight-theme-select {
   display: none !important;
 }
-:root{
+
+:root {
   --sl-content-width: 50rem !important;
   --pagefind-ui-scale: .8;
   --pagefind-ui-primary: #393939;
@@ -21,7 +330,6 @@ starlight-theme-select {
   --sl-text-h4: var(--sl-text-xl);
   --sl-text-h5: var(--sl-text-lg);
 }
-
 
 *, :before, :after {
   box-sizing: border-box;
@@ -52,109 +360,55 @@ html, :host {
   -webkit-tap-highlight-color: transparent
 }
 
-.header {
-    gap: var(--sl-nav-gap);
-    justify-content: space-between;
-    align-items: center;
-    height: 100%;
-  }
+#category-group > a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-  #category-group > a {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+.text-link {
+  color: #3182fb;
+}
 
-  .text-link {
-    color: #3182fb;
-  }
+.title-wrapper {
+  /* Prevent long titles overflowing and covering the search and menu buttons on narrow viewports. */
+  /*overflow: hidden;*/
+}
 
-  .title-wrapper {
-    /* Prevent long titles overflowing and covering the search and menu buttons on narrow viewports. */
-    /*overflow: hidden;*/
-  }
+.title-wrapper:not(:where(.sl-flex *)) {
+  /* Prevent long titles overflowing and covering the search and menu buttons on narrow viewports. */
+  padding: 100px;
+}
 
-  .title-wrapper:not(:where(.sl-flex *)) {
-    /* Prevent long titles overflowing and covering the search and menu buttons on narrow viewports. */
-    padding: 100px;
-  }
+.right-group,
+.social-icons {
+  gap: 1rem;
+  align-items: center;
+}
 
-  .right-group,
-  .social-icons {
-    gap: 1rem;
-    align-items: center;
-  }
-
-  .social-icons::after {
-    content: '';
-    height: 2rem;
-    border-inline-end: 1px solid var(--sl-color-gray-5);
-  }
-
-  @media (min-width: 50rem) {
-
-    site-search button {
-      border: 1px solid var(--sl-color-gray-5);
-      border-radius: .5rem;
-      padding-inline-start: .75rem;
-      padding-inline-end: .5rem;
-      background-color: var(--sl-color-black);
-      color: var(--sl-color-gray-2);
-      font-size: var(--sl-text-sm);
-    }
-
-    :global(:root[data-has-sidebar]) {
-      --__sidebar-pad: calc(2 * var(--sl-nav-pad-x));
-    }
-
-    :global(:root:not([data-has-toc])) {
-      --__toc-width: 0rem;
-    }
-
-    .pagefind-ui__search-input {
-      height: calc(64px * var(--pagefind-ui-scale));
-      padding: 0 calc(70px * var(--pagefind-ui-scale)) 0 calc(54px * var(--pagefind-ui-scale));
-      background-color: var(--pagefind-ui-background);
-      border: var(--pagefind-ui-border-width) solid var(--pagefind-ui-border);
-      border-radius: var(--pagefind-ui-border-radius);
-      font-size: calc(21px * var(--pagefind-ui-scale));
-    }
-
-    .header {
-      --__sidebar-width: max(0rem, var(--sl-content-inline-start, 0rem) - var(--sl-nav-pad-x));
-      --__main-column-fr: calc(
-          (100% + var(--__sidebar-pad, 0rem) - var(--__toc-width, var(--sl-sidebar-width)) -
-          (2 * var(--__toc-width, var(--sl-nav-pad-x))) - var(--sl-content-inline-start, 0rem) -
-          var(--sl-content-width)) / 2
-      );
-      display: grid;
-      grid-template-columns:
-        /* 1 (site title): runs up until the main content column’s left edge or the width of the title, whichever is the largest  */ minmax(
-					calc(var(--__sidebar-width) + max(0rem, var(--__main-column-fr) - var(--sl-nav-gap))),
-          auto
-				)
-				/* 2 (search box): all free space that is available. */
-				1fr
-				/* 3 (right items): use the space that these need. */
-				auto;
-      align-content: center;
-    }
-  }
+.social-icons::after {
+  content: '';
+  height: 2rem;
+  border-inline-end: 1px solid var(--sl-color-gray-5);
+}
 
 header {
-  height: 3.5rem !important;
+  max-height: 56px !important;
   z-index: 1;
 }
 
-#starlight__sidebar {
-  z-index: 0;
-}
-
-.header > div:first-child span{
+.header > div:first-child span {
   font-size: 16px;
 }
 
-starlight-menu-button svg{
+starlight-menu-button button {
+  /*background: white;*/
+  border-radius: 10px;
+  box-shadow: none;
+  border: 1px solid #f5f5f5;
+}
+
+starlight-menu-button svg {
   height: auto;
   margin: auto;
 }
@@ -163,25 +417,26 @@ site-search button {
   font-size: var(--sl-text-sm);
 }
 
-site-search svg{
+site-search svg {
   font-size: 1em;
   width: 1em;
   height: 1em;
 }
 
-starlight-menu-button button {
-  background:  white;
-}
-
-header img{
+header img {
   width: 5.5rem !important;
 }
+
 body {
   margin: 0;
   line-height: inherit;
   font-family: Pretendard Variable !important;
 }
-.main-pane main{margin: 1rem;}
+
+.main-pane main {
+  margin: 1rem;
+}
+
 .main-pane main .content-panel {
   padding: 0;
   margin-bottom: 12px !important;
@@ -191,6 +446,10 @@ body {
   border-top: 0 !important;
 }
 
+.main-pane .sl-container {
+  margin: auto !important;
+}
+
 hr {
   height: 0;
   color: inherit;
@@ -198,24 +457,17 @@ hr {
   margin: 20px 0;
 }
 
-/*.sl-markdown-content :not(a, strong, em, del, span, input, code) + :not(a, strong, em, del, span, input, code, :where(.not-content *)) {
-  margin-top: 0;
-}
-
-.sl-markdown-content :not(h1, h2, h3, h4, h5, h6, .sl-heading-wrapper) + :is(.sl-heading-wrapper) {
-  margin-top: 0;
-}*/
-
 /* 고정값 '개요'를 제거하기 위함 */
 #starlight__mobile-toc > div > ul > li:first-child, starlight-toc > nav > ul > li:first-child {
   display: none;
 }
 
-a[aria-current='true']{
+a[aria-current='true'] {
   color: #034AD8 !important;
   font-weight: 500;
 }
-a[aria-current='true']>span{
+
+a[aria-current='true'] > span {
   color: inherit;
 }
 
@@ -263,10 +515,11 @@ abbr:where([title]) {
   --un-bg-opacity: 1;
   background-color: rgb(255 237 213 / var(--un-bg-opacity));
 }
-.sl-markdown-content li > :last-child:not(li, ul, ol):not(a, strong, em, del, span, input, :where(.not-content *)){
+
+.sl-markdown-content li > :last-child:not(li, ul, ol):not(a, strong, em, del, span, input, :where(.not-content *)) {
   margin-top: 0;
   line-height: 1.5;
-  margin-bottom:8px;
+  margin-bottom: 8px;
 }
 
 h1 {
@@ -427,7 +680,7 @@ progress {
   font: inherit
 }
 
-button:where{
+button:where {
   position: fixed;
   top: calc((var(--sl-nav-height) - var(--sl-menu-button-size)) / 2);
   inset-inline-end: var(--sl-nav-pad-x);
@@ -469,12 +722,12 @@ ol, ul, menu {
   margin: .25em 0 .25em .25em;
 }
 
-starlight-tabs [role=tablist]{
+starlight-tabs [role=tablist] {
   flex-direction: row !important;
   list-style: none !important;
 }
 
-:where(.astro-esqgolmp)[role=tablist]{
+:where(.astro-esqgolmp)[role=tablist] {
   border-bottom: 0;
 }
 
@@ -974,11 +1227,18 @@ img, video {
   position: fixed
 }
 
-.meta{margin-top: 0;}
-.right-sidebar{
+.meta {
+  margin-top: 0;
+}
+
+.right-sidebar {
   border: 0px;
 }
-.sl-container:where(.astro-7nkwcw3z)>* + *{margin-top: 0}
+
+.sl-container:where(.astro-7nkwcw3z) > * + * {
+  margin-top: 0
+}
+
 .relative {
   position: relative
 }
@@ -1300,15 +1560,15 @@ img, video {
   margin-inline-start: 1rem
 }
 
-.mt-0{
+.mt-0 {
   margin-top: 0;
 }
 
-.mt-1{
+.mt-1 {
   margin-top: .25em;
 }
 
-.mt-5{
+.mt-5 {
   margin-top: 2px !important;
 }
 
@@ -1624,7 +1884,7 @@ img, video {
   display: table
 }
 
-.sl-markdown-content table:not(footer table){
+.sl-markdown-content table:not(footer table) {
   width: 100%;
   display: table !important;
   margin: .5rem !important;
@@ -1654,14 +1914,15 @@ img, video {
   font-size: 16px;
   font-weight: bold;
 }
-.sl-markdown-content table:not(footer table) th{
+
+.sl-markdown-content table:not(footer table) th {
   padding: .5rem;
   border-color: #e5e7eb;
   background-color: #f1f5f980;
   border-width: 1px;
 }
 
-.sl-markdown-content table:not(footer table) td{
+.sl-markdown-content table:not(footer table) td {
   border-width: 1px;
   font-weight: 400;
   border-color: #e5e7eb;
@@ -1905,7 +2166,7 @@ img, video {
   word-break: keep-all
 }
 
-#category-group::before{
+#category-group::before {
   content: "";
   height: 2rem;
   border-inline-end: 1px solid var(--sl-color-gray-5);
@@ -2172,12 +2433,12 @@ img, video {
 
 .bg-primary {
   --un-bg-opacity: 1;
-    background-color: #034AD8;
+  background-color: #034AD8;
 }
 
 .bg-primary-2 {
   --un-bg-opacity: 1;
-    background-color: #d4e5fa;
+  background-color: #d4e5fa;
 }
 
 .bg-red {
@@ -2674,13 +2935,15 @@ text-4xl, .text-8 {
 }
 
 .sl-markdown-content :is(th:first-child, td:first-child):not(:where(.not-content *)),
-.sl-markdown-content :is(th:last-child, td:last-child):not(:where(.not-content *)){
+.sl-markdown-content :is(th:last-child, td:last-child):not(:where(.not-content *)) {
   padding-inline: .5rem !important;
 }
+
 .group[data-active=true] .group-data-\[active\=true\]\:text-orange-5, .data-\[active\=true\]\:text-orange-5[data-active=true], .text-orange-5 {
   --un-text-opacity: 1;
   color: #3182fb;
 }
+
 .sl-markdown-content a:not(:where(.not-content *)) {
   --un-text-opacity: 1;
   color: #3182fb;
@@ -2984,7 +3247,7 @@ footer {
   color: #6b7684;
 }
 
-.pagination-links a{
+.pagination-links a {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -3001,115 +3264,15 @@ footer {
   overflow-wrap: anywhere;
 }
 
-/* md = 768px 이상 */
-@media (min-width: 768px) {
-  .md\:hidden {
-    display: none;
-  }
-  .md\:block {
-    display: block;
-  }
-
-  .md\:gap-6 {
-    gap: 1.5rem;
-  }
-
-  .md\:mb-16 {
-    margin-bottom: 4rem;
-  }
-
-  .md\:grid-cols-1 {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-
-  .md\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .md\:grid-cols-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .blur-xs {
-    filter: blur(4px);
-  }
-
-  .blur-sm {
-    filter: blur(8px);
-  }
-
-  .blur-md {
-    filter: blur(12px);
-  }
-
-  .blur-lg {
-    filter: blur(16px);
-  }
-
-  .blur-xl {
-    filter: blur(24px);
-  }
-
-  .blur-2xl {
-    filter: blur(40px);
-  }
-
-  .blur-3xl {
-    filter: blur(64px);
-  }
-
-  .blur-none {
-    filter: ;
-  }
-
-  .sidebar-content .top-level li a {
-      display: inline-flex;
-      align-items: center;   /* ⭐ 세로 가운데 정렬 */
-      gap: 6px;
-  }
-
-
-.new-badge {
-     display: inline-block;
-     background: #ff4d4f;
-     color: #fff;
-     font-size: 11px;
-     padding: 2px 6px;
-     border-radius: 10px;
-     line-height: 1;   /* ⭐ 위아래 여백 제거 */
- }
-
-}
-@media (min-width: 992px) {
-  .lg\:block {
-      display: block;
-    }
-}
-@media (min-width: 1200px) {
-  .xl\:block {
-      display: block;
-    }
-}
-@media (max-width: 767.99px) {
-  #category-group {
-    display: none;
-  }
-}
-
-@media ( max-width: 991.98px) {
-  #category-group {
-    display: none;
-  }
-}
-
 .custom-page-move {
-    color: #4e5968 !important;
-    display: flex;
-    align-items: center;
+  color: #4e5968 !important;
+  display: flex;
+  align-items: center;
 }
+
 .custom-page-move:hover {
-    background: #f2f4f6;
-    color: #3182fb !important;
+  background: #f2f4f6;
+  color: #3182fb !important;
 }
 
 .level-h1, .level-h2, .level-h3, .level-h4, .level-h1 > h1, .level-h2 > h2, .level-h3 > h3, .level-h4 > h4 {
