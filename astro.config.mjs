@@ -14,12 +14,17 @@ export default defineConfig({
           components: {
               Header: './src/components/Header.astro',
               PageTitle: './src/components/Title.astro',
+              Head: "./src/components/Head.astro",
           },
           logo: {
               src: './src/assets/logo/ubcn-logo-text.png',
           },
           favicon: '/favicon.png',
-          customCss: ['./src/assets/styles/style.css'],
+          customCss: [
+            "./src/assets/styles/pretendardvariable.css",
+            "./src/assets/styles/style.css",
+            "./src/assets/styles/glossary.css",
+          ],
           social: [],
           defaultLocale: 'root',
           locales: {

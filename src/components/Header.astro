@@ -2,7 +2,8 @@
 import config from 'virtual:starlight/user-config';
 import Search from 'virtual:starlight/components/Search';
 import SiteTitle from 'virtual:starlight/components/SiteTitle';
-import { Icon } from '@astrojs/starlight/components';
+import {Icon} from '@astrojs/starlight/components';
+import "../assets/styles/pretendardvariable.css";
 import '../styles/global.css';
 import "../assets/styles/style.css";
 
@@ -26,7 +27,7 @@ const pathName = Astro.url.pathname;
   const urlPathNameElement = document.getElementById('pathName');
   const sidebarCategoryContents = document.querySelectorAll("ul.top-level > li:not(:has(details)) a")
   for (let i = 0; i < sidebarCategoryContents.length; i++) {
-    if(urlPathNameElement!.value?.split("/")[1] === sidebarCategoryContents[i].href.split("/")[3]) {
+    if (urlPathNameElement!.value?.split("/")[1] === sidebarCategoryContents[i].href.split("/")[3]) {
       sidebarCategoryContents[i].setAttribute("aria-current", "page");
     }
   }
@@ -85,16 +86,16 @@ const pathName = Astro.url.pathname;
           <span class="font-bold">
             네트워크
           </span>
-        <Icon class="" name="external" />
+        <Icon class="" name="external"/>
     </a>
     <a class="h-full inline-flex items-center px-4" href="/faq">
-              <span class="font-bold">
-                자주 묻는 질문
-              </span>
+        <span class="font-bold">
+          자주 묻는 질문
+        </span>
     </a>
     <a class="h-full inline-flex items-center px-4" href="/policy">
-              <span class="font-bold">
-                서비스 운영 정책
-              </span>
+        <span class="font-bold">
+          서비스 운영 정책
+        </span>
     </a>
 </div>
