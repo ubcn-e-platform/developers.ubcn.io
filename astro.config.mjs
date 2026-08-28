@@ -63,6 +63,11 @@ export default defineConfig({
                           autogenerate: {directory: 'release-notes/2026-06'},
                           collapsed: false
                       },
+                      {
+                          label: '2026년 8월',
+                          autogenerate: {directory: 'release-notes/2026-08'},
+                          collapsed: false
+                      },
                   ],
               },
               {
