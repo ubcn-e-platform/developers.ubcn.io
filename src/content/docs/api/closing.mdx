@@ -8,327 +8,245 @@ sidebar:
 #        variant: tip
 description: 마감된 거래와 관련된 API 기능을 제공합니다.
 releasedAt: 2024-08-09
-writtenAt: 2024-08-09
+writtenAt: 2026-10-16
 ---
 
-import Button from "/src/components/Button.astro";
 import Frame from "/src/components/Frame.astro";
 import Table from "/src/components/Table.astro";
+import {headers, row, reqHeaders, reqRow, cells} from "/src/components/tableRows.js";
 
 <Frame>
-발생한 매출에 대해 마감된 정보를 조회할 수 있습니다.\
-마감의 종류로는 `수동마감`과 `자동마감` 이 존재합니다.
+발생한 매출에 대해 마감된 정보를 조회할 수 있습니다.<br/>
+마감내역은 단말기별 `상품별` 또는 `컬럼별`로 집계된 건수·금액을 결제수단별로 제공합니다.<br/>
+마감의 종류로는 `수동마감`과 `자동마감`이 존재합니다.
 
 + 수동마감
     + 머신기 또는 단말기에서 직접 마감을 진행하는 경우
     + 특정 시간에 마감을 진행하는 경우(예: 17:45:00) - (단말기 펌웨어를 통해 제어)
 + 자동마감
     + 시스템에서 자동으로 마감을 진행하는 경우(23:59:59 고정)
+
+<b>마감내역 조회는 `마감일자 기준 조회`와 `24시간 구간 조회` 두 가지 방식을 지원합니다.</b>
+
+- 모든 요청은 헤더에 `company`, `token`이 필요합니다. ([API 시작하기](/api/) 참고)
+- `GET`, `POST` 방식을 모두 지원하며, 요청 Body는 사용하지 않습니다.
+- 조회 결과가 없는 경우 HTTP 상태코드 `404`와 함께 `closingList` 필드가 제외된 응답이 전달됩니다.
 </Frame>
 
-## 기본 호출 구문
+## 마감일자 기준 조회
 <Frame>
-```ts
+    <strong style={"color: green"}>GET | POST</strong> /closing/`{closingType}`/`{date}`
 
-const API = axios.create({
-  baseURL: `http://api.ubcn.co.kr/api`,
-  headers: {
-    "Access-Control-Allow-Origin": "*",
-    "company": "{company}",
-    "token": "{token}",
-  },
-});
+    단말기의 마감일자가 요청일자(`date`)인 거래를 집계하여 조회합니다.<br/>
+    오늘 날짜로 조회하는 경우, 아직 자동마감(23:59:59)이 진행되지 않았으므로 **수동마감된 거래만** 집계됩니다.<br/>
+    취소된 거래는 집계에서 제외됩니다.
 
-// get, post 모두 지원합니다.
-// 조회일자를 기준으로 마감 정보가 없을 경우, 데이터가 출력되지 않습니다.
+    ### Request Schema
+    요청에서 필요로 하는 필드는 다음과 같습니다.
+    <Table headers={reqHeaders} bodys={[
+        reqRow("closingType", "Y", "String", "집계 유형 (Path)", "`product`: 단말기 + 상품별 집계<br/>`column`: 단말기 + 컬럼별 집계"),
+        reqRow("date", "Y", "String", "마감일자 (Path)", "`YYYYMMDD` 규격<br/>오늘 이후의 일자는 요청 불가"),
+    ]}></Table>
 
-// {date}만 작성하는 경우, 해당 날짜의 전체 마감내역을 조회합니다.
-// 예시) /20240809 입력 시
-// 20240809 일자에 발생한 전체 마감내역을 조회합니다.
-const res = await API.get("/closing/{closingType}/{date}");
+    ### 호출구문
+    ```ts
+    const API = axios.create({
+      baseURL: `http://api.ubcn.co.kr/api`,
+      headers: {
+        "company": "{company}",
+        "token": "{token}",
+      },
+      // 조회 결과가 없을 때 404가 응답되므로, 404는 정상 응답으로 처리합니다.
+      validateStatus: (status) => status < 500,
+    });
 
-// {date}와 {time}을 작성하는 경우,
-// 해당 날짜의 전일자 {time} 부터 해당 날짜 {time} 까지의 마감내역을 조회합니다.
-// 예시) /20240809/180000 입력 시
-// 20240808 18시부터 20240809 18시까지의 마감내역을 조회합니다.
-const res = await API.get("/closing/{closingType}/{date}/{time}");
+    // get, post 모두 지원합니다.
+    // 예시) 2026년 10월 15일 마감내역을 상품별로 조회
+    const res = await API.get("/closing/product/20261015");
 
-// 결과 출력
-console.log(res.data);
+    // 예시) 2026년 10월 15일 마감내역을 컬럼별로 조회
+    const res2 = await API.get("/closing/column/20261015");
 
-// 프로세스가 제대로 완료되지 않은 경우 에러 코드가 존재합니다.
-if (res.code != null) {
-  return alert(res.decription);
-}
+    if (res.status === 200) {
+      console.log(res.data.closingList);
+    } else if (res.status === 404) {
+      console.log("조회된 마감내역이 없습니다.");
+    } else {
+      // 요청 오류: code(존재하는 경우), message 를 확인합니다.
+      console.error(res.data.code, res.data.message);
+    }
+    ```
+    <br/>
 
-```
+    ### Response Schema
+    결과 값에 들어 있는 필드는 다음과 같습니다.
+    <Table headers={headers} bodys={[
+        row("type", "-", "Y", "String", "API 유형", "`closing` 고정"),
+        row("message", "-", "Y", "String", "응답 메시지", "조회 성공: `Get ClosingList at {date}`<br/>결과 없음: `No Result`"),
+        row("closingDate", "-", "Y", "String", "요청일자", "`YYYY-MM-DD` 형식"),
+        row("decription", "-", "Y", "String", "API 상세설명", "필드명 표기(`decription`)는 실제 응답 키 그대로입니다."),
+        row("closingList", "-", "N", "Array", "마감내역 리스트", "객체 리스트<br/>조회 결과가 없으면 필드 자체가 제외됨"),
+        row("closingList", "closingDate", "Y", "String", "마감일자", "YYYYMMDD"),
+        row("closingList", "terminalID", "Y", "String", "단말기 ID", "UBCn 단말기 ID<br/>필드명 대소문자에 유의 (`terminalID`)"),
+        row("closingList", "terminalCode", "Y", "String", "단말기(자판기) 코드", "가맹점 관리 단말기 코드"),
+        row("closingList", "placeCode", "Y", "String", "위치코드(점포코드)", "미등록 시 `-`"),
+        row("closingList", "placeNo", "Y", "String", "위치순번(POS번호)", "미등록 시 `-`"),
+        row("closingList", "cabNo", "Y", "int", "머신기 캐비넷 번호", "`column` 집계 시 제공<br/>캐비넷 구분이 없거나 `product` 집계 시 `0`"),
+        row("closingList", "colNo", "Y", "int", "머신기 컬럼번호", "`column` 집계 시 제공<br/>`product` 집계 시 `0`"),
+        row("closingList", "productCode", "N", "String", "상품코드", "-"),
+        row("closingList", "productName", "N", "String", "상품명", "상품 미등록 시 `null`"),
+        row("closingList", "productBarcode", "Y", "String", "상품 바코드", "미등록 시 `-`"),
+        row("closingList", "totCnt", "Y", "int", "전체 매출수량", "모든 결제수단 합계"),
+        row("closingList", "totAmt", "Y", "int", "전체 매출금액", "모든 결제수단 합계"),
+        row("closingList", "cashCnt", "Y", "int", "현금 매출수량", "-"),
+        row("closingList", "cashAmt", "Y", "int", "현금 매출금액", "-"),
+        row("closingList", "cardCnt", "Y", "int", "신용카드 매출수량", "-"),
+        row("closingList", "cardAmt", "Y", "int", "신용카드 매출금액", "-"),
+        row("closingList", "tmnCnt", "Y", "int", "티머니 매출수량", "선불카드"),
+        row("closingList", "tmnAmt", "Y", "int", "티머니 매출금액", "선불카드"),
+        row("closingList", "csbCnt", "Y", "int", "이즐(캐시비) 매출수량", "선불카드"),
+        row("closingList", "csbAmt", "Y", "int", "이즐(캐시비) 매출금액", "선불카드"),
+        row("closingList", "mybCnt", "Y", "int", "마이비 매출수량", "선불카드"),
+        row("closingList", "mybAmt", "Y", "int", "마이비 매출금액", "선불카드"),
+        row("closingList", "krpCnt", "Y", "int", "레일플러스 매출수량", "선불카드"),
+        row("closingList", "krpAmt", "Y", "int", "레일플러스 매출금액", "선불카드"),
+        row("closingList", "npcCnt", "Y", "int", "페이코 매출수량", "간편결제"),
+        row("closingList", "npcAmt", "Y", "int", "페이코 매출금액", "간편결제"),
+        row("closingList", "kkpCnt", "Y", "int", "카카오페이 매출수량", "간편결제"),
+        row("closingList", "kkpAmt", "Y", "int", "카카오페이 매출금액", "간편결제"),
+    ]}></Table>
+
+    ### Response JSON 예시
+    아래 값은 이해를 돕기 위한 예시입니다. (상품별 집계, HTTP 200)
+    ```json
+    {
+      "type": "closing",
+      "message": "Get ClosingList at 20261015",
+      "closingDate": "2026-10-15",
+      "decription": "단말기 마감일 기준으로 판매된 데이터를 추출합니다. 오늘날짜 조회의 경우, 수동 마감 이외에는 데이터가 추출되지 않습니다.",
+      "closingList": [
+        {
+          "closingDate": "20261015",
+          "terminalID": "1000000001",
+          "terminalCode": "VM-001",
+          "placeCode": "S001",
+          "placeNo": "0001",
+          "cabNo": 0,
+          "colNo": 0,
+          "productCode": "P0001",
+          "productName": "생수 500ml",
+          "productBarcode": "8801234567890",
+          "totCnt": 12,
+          "totAmt": 12000,
+          "cashCnt": 2,
+          "cashAmt": 2000,
+          "cardCnt": 7,
+          "cardAmt": 7000,
+          "tmnCnt": 1,
+          "tmnAmt": 1000,
+          "csbCnt": 0,
+          "csbAmt": 0,
+          "mybCnt": 0,
+          "mybAmt": 0,
+          "krpCnt": 0,
+          "krpAmt": 0,
+          "npcCnt": 1,
+          "npcAmt": 1000,
+          "kkpCnt": 1,
+          "kkpAmt": 1000
+        }
+      ]
+    }
+    ```
+
+    조회 결과가 없는 경우 (HTTP 404)
+    ```json
+    {
+      "type": "closing",
+      "message": "No Result",
+      "closingDate": "2026-10-15",
+      "decription": "단말기 마감일 기준으로 판매된 데이터를 추출합니다. 오늘날짜 조회의 경우, 수동 마감 이외에는 데이터가 추출되지 않습니다."
+    }
+    ```
 </Frame>
+
+## 24시간 구간 조회
 <Frame>
-## Schema
-결과 값에 들어 있는 필드는 다음과 같습니다.
+    <strong style={"color: green"}>GET | POST</strong> /closing/`{closingType}`/`{date}`/`{time}`
+
+    마감 여부와 관계없이, 요청일자 전일의 `time`부터 요청일자의 `time` 직전까지 **24시간 동안 발생한 거래**를 집계하여 조회합니다.<br/>
+    가맹점의 정산 기준 시각이 자정이 아닌 경우(예: 매일 18시 기준)에 사용합니다.
+
+    ### Request Schema
+    요청에서 필요로 하는 필드는 다음과 같습니다.
+    <Table headers={reqHeaders} bodys={[
+        reqRow("closingType", "Y", "String", "집계 유형 (Path)", "`product`: 단말기 + 상품별 집계<br/>`column`: 단말기 + 컬럼별 집계"),
+        reqRow("date", "Y", "String", "기준일자 (Path)", "`YYYYMMDD` 규격<br/>오늘 이후의 일자는 요청 불가"),
+        reqRow("time", "Y", "String", "기준시간 (Path)", "`HHMISS` 규격 (24시간제)"),
+    ]}></Table>
+
+    ### 호출구문
+    ```ts
+    // get, post 모두 지원합니다.
+    // 예시) /20261015/180000 입력 시
+    // 2026-10-14 18:00:00 부터 2026-10-15 17:59:59 까지 발생한 거래를 상품별로 집계합니다.
+    const res = await API.get("/closing/product/20261015/180000");
+    ```
+
+    ### 참고사항
+    - 응답의 `closingList.closingDate`에는 요청한 기준일자(`date`)가 전달됩니다.
+    - 매월 1일에 호출하는 경우, 전일 데이터는 포함되지 않고 기준일자 `000000`부터 `time` 직전까지의 거래만 집계됩니다.
+
+    <b>※ 응답 규격 및 예시는 상단의 [마감일자 기준 조회]와 동일합니다.</b>
+</Frame>
+
+## 집계 데이터 해석 시 참고사항
+<Frame>
+    - `totCnt`, `totAmt`는 모든 결제수단의 합계입니다. 결제수단별 항목에 포함되지 않는 결제수단(예: 그 외 간편결제)이 있을 수 있으므로, 결제수단별 합계와 일치하지 않을 수 있습니다.
+    - `column` 집계 시 컬럼번호가 4자리인 머신기는 앞 2자리가 `colNo`, 뒤 2자리가 `cabNo`로 전달됩니다.
+    - `column` 집계는 단말기 + 컬럼 + 상품 단위로 집계되므로, 동일 컬럼에서 판매 상품이 변경된 경우 여러 행으로 나뉘어 전달될 수 있습니다.
+    - 응답 필드의 순서는 보장되지 않습니다. 필드명으로 값을 참조해 주세요.
+</Frame>
+
+## 에러 응답
+<Frame>
+    요청이 정상적으로 처리되지 않은 경우 아래와 같은 형식으로 응답됩니다.
+
+    ### 인증 오류
+    `code`가 포함된 형식으로 응답됩니다. 코드 전체 목록은 [응답코드 정리](/api/code/)를 참고해 주세요.
     <Table
-        headers={[{"title": "필드명"}, {"subTitle": "상세필드명"}, {"notNull": "필수"},
-            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
-        bodys={
-            [
-                [
-                    {"title": "decription"},
-                    {"subTitle": "-"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "API 상세설명"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "message"},
-                    {"subTitle": "-"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "응답 메시지"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "type"},
-                    {"subTitle": "-"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "API 유형"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "closingDate"},
-                    {"subTitle": "-"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "요청일자"},
-                    {"etc": "YYYYMMDD"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "closingDate"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "마감일자"},
-                    {"etc": "YYYYMMDD"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "terminalId"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "단말기 ID"},
-                    {"etc": "UBCn 단말기 ID"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "terminalCode"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "단말기 코드"},
-                    {"etc": "가맹점 관리 단말기 코드"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "placeCode"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "위치코드(점포코드)"},
-                    {"etc": "점포코드"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "placeNo"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "위치순번(POS번호)"},
-                    {"etc": "POS번호"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "cabNo"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "머신기 캐비넷 번호"},
-                    {"etc": "컬럼별 마감 시"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "colNo"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "머신기 컬럼"},
-                    {"etc": "컬럼별 마감 시"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "productName"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "상품명"},
-                    {"etc": "상품별 마감 시"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "productCode"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "상품코드"},
-                    {"etc": "상품별 마감 시"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "productBarcode"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "상품 바코드"},
-                    {"etc": "상품별 마감 시"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "totCnt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "전체 매출수량"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "totAmt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "전체 매출금액"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "cashCnt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "현금(영수증) 매출수량"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "cashAmt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "현금(영수증) 매출금액"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "cardCnt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "신용카드 매출수량"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "cardAmt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "신용카드 매출금액"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "tmnCnt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "티머니 매출수량"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "tmnAmt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "티머니 매출금액"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "csbCnt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "이즐 매출수량"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "csbAmt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "이즐 매출금액"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "mybCnt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "마이비 매출수량"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "mybAmt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "마이비 매출금액"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "krpCnt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "레일플러스 매출수량"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "krpAmt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "레일플러스 매출금액"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "npcCnt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "페이코 매출수량"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "npcAmt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "페이코 매출금액"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "kkpCnt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "카카오페이 매출수량"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "kkpAmt"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "카카오페이 매출금액"},
-                    {"etc": "-"},
-                ],
-            ]
-        }>
+        headers={[{"status": "HTTP 상태"}, {"code": "code"}, {"description": "description"}, {"cause": "발생 조건"}]}
+        bodys={[
+            cells("400", "ERR_101", "token 데이터 누락", "헤더에 `token`이 없는 경우"),
+            cells("400", "ERR_102", "company 데이터 누락", "헤더에 `company`가 없는 경우"),
+            cells("400", "ERR_103", "token 과 company 미일치(인증 실패)", "`token`이 `company`에 대해 발급된 값이 아닌 경우"),
+            cells("400", "ERR_105", "유효하지 않은 company", "API 사용 권한이 등록되지 않은 `company`인 경우"),
+        ]}>
     </Table>
+
+    ```json
+    {
+      "type": "closing",
+      "code": "ERR_103",
+      "description": "token 과 company 미일치(인증 실패)",
+      "message": "필수 데이터가 누락되었습니다."
+    }
+    ```
+
+    ### 요청값 오류
+    `code` 없이 `type`, `message`만 응답됩니다. (HTTP 400)
+    <Table
+        headers={[{"message": "message"}, {"cause": "발생 조건"}]}
+        bodys={[
+            cells("closingType이 명확하지 않습니다.", "`closingType`이 `product`, `column`이 아닌 경우"),
+            cells("오늘 날짜 이후의 시간은 요청이 불가능합니다.", "`date`가 오늘 이후인 경우"),
+        ]}>
+    </Table>
+
+    ```json
+    {
+      "type": "closing",
+      "message": "closingType이 명확하지 않습니다."
+    }
+    ```
 </Frame>
-{/*<Button url={"https://devapi.ubcn.co.kr:17881/list/noticeList"} title={"테스트 버튼"}/>*/}

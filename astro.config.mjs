@@ -79,6 +79,7 @@ export default defineConfig({
                       {label: '응답코드 정리', slug: 'api/code'},
                       {label: '거래내역 요청', slug: 'api/sales'},
                       {label: '마감내역 요청', slug: 'api/closing'},
+                      {label: '정산내역 요청', slug: 'api/adjust'},
                       {label: '상태이상 정보 요청', slug: 'api/controlerror'},
                       {
                           label: '기타결제',

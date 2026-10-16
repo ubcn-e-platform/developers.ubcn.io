@@ -1,0 +1,287 @@
+---
+layout: /src/layouts/api/Layout.astro
+title: 정산내역 요청
+sidebar:
+    order: 5
+#    badge:
+#        text: New
+#        variant: tip
+description: 매입·입금 등 정산 결과와 관련된 API 기능을 제공합니다.
+releasedAt: 2026-10-16
+writtenAt: 2026-10-16
+---
+
+import Frame from "/src/components/Frame.astro";
+import Table from "/src/components/Table.astro";
+import {headers, row, reqHeaders, reqRow, cells} from "/src/components/tableRows.js";
+
+<Frame>
+결제된 거래의 정산(매입·입금) 결과를 조회할 수 있습니다.<br/>
+정산내역은 거래별 입금일, 수수료, 입금액, 매입일자 등 확정된 정산 정보를 제공합니다.<br/>
+[거래내역 요청](/api/sales/)의 `purchaseExpDate`, `payExpDate`는 예정일이며, 확정된 정산 정보는 본 API를 이용해 주세요.<br/><br/>
+
+<b>정산내역은 입금일 기준으로 조회하며, 한 페이지에 최대 `1,000건`씩 페이지 단위로 전달됩니다.</b>
+
+- 모든 요청은 헤더에 `company`, `token`이 필요합니다. ([API 시작하기](/api/) 참고)
+- `GET`, `POST` 방식을 모두 지원하며, 요청 Body는 사용하지 않습니다.
+- 당일 정산내역은 **오후(12시 이후)에만** 조회할 수 있습니다.
+</Frame>
+
+## 조회 절차
+<Frame>
+    ### 왜 두 번에 나누어 조회하나요?
+    정산내역은 거래 데이터와는 별도로 정산(매입·입금) 처리 결과가 반영되어 만들어지는 정보입니다.<br/>
+    그래서 거래내역처럼 하루치를 한 번에 요청하지 않고, 안정적인 조회를 위해 **전체 건수 확인**과 **페이지별 조회** 두 단계로 나누어 조회합니다.
+
+    | 단계 | 하는 일 | 호출하는 API |
+    |------|---------|--------------|
+    | 1단계 | 전체 건수를 확인하고, **몇 페이지를 조회해야 하는지** 계산합니다. | [정산내역 건수 조회](#정산내역-건수-조회) |
+    | 2단계 | 1페이지부터 마지막 페이지까지 **페이지 번호를 바꿔가며** 정산내역을 받아옵니다. | [정산내역 조회](#정산내역-조회) |
+</Frame>
+
+## 정산내역 건수 조회
+<Frame>
+    <strong style={"color: green"}>GET | POST</strong> /adjust/pageinfo/`{date}`
+
+    요청일자(`date`)의 정산내역 전체 건수와 페이징 정보를 조회합니다.<br/>
+    조회해야 할 페이지 수는 `totalCnt ÷ pagingOffset`을 올림하여 계산합니다. (예: 2,500건 → 3페이지)
+
+    ### Request Schema
+    요청에서 필요로 하는 필드는 다음과 같습니다.
+    <Table headers={reqHeaders} bodys={[
+        reqRow("date", "Y", "String", "입금일자 (Path)", "`YYYYMMDD` 규격 (숫자만 허용)<br/>오늘 이후의 일자는 요청 불가<br/>당일은 오후에만 요청 가능"),
+    ]}></Table>
+
+    ### 호출구문
+    ```ts
+    const API = axios.create({
+      baseURL: `http://api.ubcn.co.kr/api`,
+      headers: {
+        "company": "{company}",
+        "token": "{token}",
+      },
+      // 조회 결과가 없을 때 404가 응답되므로, 404는 정상 응답으로 처리합니다.
+      validateStatus: (status) => status < 500,
+    });
+
+    // get, post 모두 지원합니다.
+    // 예시) 2026년 10월 15일 입금 기준 정산내역 건수 조회
+    const res = await API.get("/adjust/pageinfo/20261015");
+    console.log(res.data.totalCnt);
+    ```
+    <br/>
+
+    ### Response Schema
+    결과 값에 들어 있는 필드는 다음과 같습니다.
+    <Table headers={headers} bodys={[
+        row("type", "-", "Y", "String", "API 유형", "`adjust` 고정"),
+        row("totalCnt", "-", "Y", "long", "전체 정산내역 건수", "-"),
+        row("pagingOffset", "-", "Y", "int", "페이지당 건수", "`1000` 고정"),
+        row("minRequestCnt", "-", "Y", "int", "요청 가능한 최소 페이지 번호", "`1` 고정"),
+        row("maxRequestCnt", "-", "Y", "int", "요청 가능한 최대 페이지 번호", "마지막 페이지 번호는 `totalCnt`와 `pagingOffset`으로 계산하는 것을 권장합니다."),
+    ]}></Table>
+
+    ### Response JSON 예시
+    아래 값은 이해를 돕기 위한 예시입니다. (HTTP 200)
+    ```json
+    {
+      "type": "adjust",
+      "totalCnt": 2500,
+      "pagingOffset": 1000,
+      "minRequestCnt": 1,
+      "maxRequestCnt": 3
+    }
+    ```
+</Frame>
+
+## 정산내역 조회
+<Frame>
+    <strong style={"color: green"}>GET | POST</strong> /adjust/`{date}`/`{no}`
+
+    요청일자(`date`)에 입금되는 정산내역을 페이지(`no`) 단위로 조회합니다.<br/>
+    해당 일자에 입금되는 거래와 함께, 환불(입금 후 취소) 처리된 거래가 포함됩니다.<br/>
+    마지막 페이지를 넘어서는 번호로 요청하면 조회 결과가 없어 HTTP `404`가 응답됩니다.
+
+    ### Request Schema
+    요청에서 필요로 하는 필드는 다음과 같습니다.
+    <Table headers={reqHeaders} bodys={[
+        reqRow("date", "Y", "String", "입금일자 (Path)", "`YYYYMMDD` 규격 (숫자만 허용)<br/>오늘 이후의 일자는 요청 불가<br/>당일은 오후에만 요청 가능"),
+        reqRow("no", "Y", "String", "페이지 번호 (Path)", "`1`부터 시작 (숫자만 허용)<br/>한 페이지당 최대 1,000건"),
+    ]}></Table>
+
+    ### 호출구문
+    ```ts
+    // get, post 모두 지원합니다.
+    // 예시) 2026년 10월 15일 입금 기준 정산내역 1페이지(1 ~ 1,000번째 건) 조회
+    const res = await API.get("/adjust/20261015/1");
+
+    if (res.status === 200) {
+      console.log(res.data.adjustList);
+    } else if (res.status === 404) {
+      console.log("조회된 정산내역이 없습니다.");
+    } else {
+      // 요청 오류: code(존재하는 경우), message 를 확인합니다.
+      console.error(res.data.code, res.data.message);
+    }
+    ```
+    <br/>
+
+    ### Response Schema
+    결과 값에 들어 있는 필드는 다음과 같습니다.
+    <Table headers={headers} bodys={[
+        row("type", "-", "Y", "String", "API 유형", "`adjust` 고정"),
+        row("message", "-", "Y", "String", "응답 메시지", "조회 성공: `Get adjust at {조회일}`<br/>결과 없음: `No Result`"),
+        row("requestDate", "-", "Y", "String", "조회일 (API 호출일)", "`YYYY-MM-DD` 형식<br/>요청한 입금일자가 아닌 API 호출 당일 일자"),
+        row("description", "-", "Y", "String", "API 상세설명", "-"),
+        row("adjustList", "-", "N", "Array", "정산내역 리스트", "객체 리스트<br/>조회 결과가 없으면 필드 자체가 제외됨"),
+        row("adjustList", "payDate", "Y", "String", "입금일", "YYYYMMDD"),
+        row("adjustList", "transactionNo", "Y", "String", "거래고유번호", "UBCn 거래번호<br/>[거래내역 요청](/api/sales/)의 `transactionNo`와 동일"),
+        row("adjustList", "terminalID", "Y", "String", "단말기 ID", "UBCn 단말기 ID<br/>필드명 대소문자에 유의 (`terminalID`)"),
+        row("adjustList", "terminalCode", "N", "String", "단말기(자판기) 코드", "가맹점 관리 단말기 코드"),
+        row("adjustList", "placeCode", "N", "String", "위치코드(점포코드)", "-"),
+        row("adjustList", "placeNo", "Y", "String", "위치순번(POS번호)", "마지막 4자리<br/>미등록 시 `-`"),
+        row("adjustList", "terminalTransSeq", "N", "String", "단말기 거래 일련번호", "-"),
+        row("adjustList", "tranDate", "Y", "String", "거래일자", "YYYYMMDD<br/>입금: 거래일자, 환불: 취소일자<br/>그 외 빈 문자열"),
+        row("adjustList", "tranTime", "Y", "String", "거래시간", "HH24MISS<br/>입금: 거래시간, 환불: 취소시간<br/>그 외 빈 문자열"),
+        row("adjustList", "adjustCode", "Y", "int", "정산 종류", "`1`: 매입반송, `2`: 입금, `3`: 환불"),
+        row("adjustList", "payCode", "Y", "int", "지불 종류", "`1`: 현금, `2`: 신용카드, `3`: 선불카드<br/>그 외 결제수단은 `0`"),
+        row("adjustList", "cardCode", "N", "String", "카드사(발급사) 코드", "현금 결제 시 `null`<br/>선불카드는 카드 종류 코드"),
+        row("adjustList", "vanCode", "N", "String", "VAN사 코드", "신용카드 결제만 제공"),
+        row("adjustList", "purchaseCode", "N", "String", "매입사 코드", "현금 결제 시 `null`<br/>선불카드는 카드 종류 코드"),
+        row("adjustList", "cardNo", "Y", "String", "카드번호", "마스킹된 카드번호<br/>현금 결제 시 공백"),
+        row("adjustList", "approvalNo", "Y", "String", "승인번호", "승인번호 뒤 8자리<br/>선불카드 등은 공백"),
+        row("adjustList", "approvalDate", "Y", "String", "승인일자", "YYYYMMDD"),
+        row("adjustList", "approvalTime", "Y", "String", "승인시간", "HH24MISS"),
+        row("adjustList", "orgTranDate", "Y", "String", "원거래일자", "YYYYMMDD<br/>현금·신용카드 외 결제수단은 공백"),
+        row("adjustList", "orgTransSeq", "N", "String", "원거래 단말기 거래 일련번호", "현금·신용카드 외 결제수단은 `0`"),
+        row("adjustList", "orgApprovalNo", "Y", "String", "원거래 승인번호", "승인번호 뒤 8자리<br/>현금·신용카드 외 결제수단은 공백"),
+        row("adjustList", "colNo", "Y", "int", "머신기 컬럼번호", "-"),
+        row("adjustList", "productCode", "Y", "String", "상품코드", "미등록 시 공백"),
+        row("adjustList", "productName", "Y", "String", "상품명", "미등록 시 공백"),
+        row("adjustList", "productBarcode", "Y", "String", "상품바코드", "미등록 시 `-`"),
+        row("adjustList", "count", "Y", "int", "판매수량", "항상 `1`"),
+        row("adjustList", "price", "Y", "int", "판매단가", "-"),
+        row("adjustList", "salePrice", "Y", "int", "판매금액", "판매수량 * 판매단가"),
+        row("adjustList", "discount", "Y", "int", "할인금액", "현재 미지원 (항상 `0`)"),
+        row("adjustList", "point", "Y", "int", "사용포인트", "현재 미지원 (항상 `0`)"),
+        row("adjustList", "amount", "Y", "int", "결제금액", "판매금액 - 할인금액 - 포인트"),
+        row("adjustList", "beforeBalance", "Y", "int", "사용 전 잔액", "선불카드 결제 시 제공<br/>그 외 `0`"),
+        row("adjustList", "afterBalance", "Y", "int", "사용 후 잔액", "선불카드 결제 시 제공<br/>그 외 `0`"),
+        row("adjustList", "commission", "Y", "int", "수수료", "-"),
+        row("adjustList", "receiptAmt", "Y", "int", "입금액", "결제금액 - 수수료"),
+        row("adjustList", "purchaseDate", "Y", "String", "매입일자", "YYYYMMDD<br/>매입 전인 경우 `-`"),
+    ]}></Table>
+
+    ### Response JSON 예시
+    아래 값은 이해를 돕기 위한 예시입니다. (HTTP 200)
+    ```json
+    {
+      "type": "adjust",
+      "message": "Get adjust at 2026-10-16",
+      "requestDate": "2026-10-16",
+      "description": "매입 데이터 요청에 대한 응답 결과를 전달합니다.",
+      "adjustList": [
+        {
+          "payDate": "20261015",
+          "transactionNo": "1234567890",
+          "terminalID": "1000000001",
+          "terminalCode": "VM-001",
+          "placeCode": "S001",
+          "placeNo": "0001",
+          "terminalTransSeq": "0123",
+          "tranDate": "20261008",
+          "tranTime": "093015",
+          "adjustCode": 2,
+          "payCode": 2,
+          "cardCode": "01",
+          "vanCode": "01",
+          "purchaseCode": "01",
+          "cardNo": "536181******1234",
+          "approvalNo": "12345678",
+          "approvalDate": "20261008",
+          "approvalTime": "093015",
+          "orgTranDate": "20261008",
+          "orgTransSeq": "0123",
+          "orgApprovalNo": "12345678",
+          "colNo": 11,
+          "productCode": "P0001",
+          "productName": "생수 500ml",
+          "productBarcode": "8801234567890",
+          "count": 1,
+          "price": 1000,
+          "salePrice": 1000,
+          "discount": 0,
+          "point": 0,
+          "amount": 1000,
+          "beforeBalance": 0,
+          "afterBalance": 0,
+          "commission": 25,
+          "receiptAmt": 975,
+          "purchaseDate": "20261009"
+        }
+      ]
+    }
+    ```
+
+    조회 결과가 없는 경우 (HTTP 404)
+    ```json
+    {
+      "type": "adjust",
+      "message": "No Result",
+      "requestDate": "2026-10-16",
+      "description": "매입 데이터 요청에 대한 응답 결과를 전달합니다."
+    }
+    ```
+</Frame>
+
+## 정산 데이터 해석 시 참고사항
+<Frame>
+    - **입금일 기준 조회**: `date`는 거래일이 아닌 입금일(`payDate`) 기준입니다. 거래별 대략의 입금 시점은 [거래내역 요청](/api/sales/)의 `payExpDate`(입금 예정일)로 알 수 있으나, 이는 예정일일 뿐이며 실제 입금일은 VAN사를 통해 입금 데이터가 전달될 때 확정됩니다. 확정된 입금일은 본 API의 `payDate`로 확인해 주세요.
+    - **환불**: 입금 이후 취소된 거래는 `adjustCode: 3`(환불)으로 전달되며, 요청일자가 평일인 경우 5영업일 전에 취소된 건이 포함됩니다. 이때 `tranDate`, `tranTime`은 취소일시입니다.
+    - **당일 조회 제한**: 당일 일자로는 오후(서버 시각 12시 이후)에만 조회할 수 있으며, 오전에 호출하면 HTTP `403`이 응답됩니다.
+    - 응답 필드의 순서는 보장되지 않습니다. 필드명으로 값을 참조해 주세요.
+</Frame>
+
+## 에러 응답
+<Frame>
+    요청이 정상적으로 처리되지 않은 경우 아래와 같은 형식으로 응답됩니다. 두 API(건수 조회, 정산내역 조회)의 에러 응답은 동일합니다.
+
+    ### 인증 오류
+    `code`가 포함된 형식으로 응답됩니다. 코드 전체 목록은 [응답코드 정리](/api/code/)를 참고해 주세요.
+    <Table
+        headers={[{"status": "HTTP 상태"}, {"code": "code"}, {"description": "description"}, {"cause": "발생 조건"}]}
+        bodys={[
+            cells("400", "ERR_101", "token 데이터 누락", "헤더에 `token`이 없는 경우"),
+            cells("400", "ERR_102", "company 데이터 누락", "헤더에 `company`가 없는 경우"),
+            cells("400", "ERR_103", "token 과 company 미일치(인증 실패)", "`token`이 `company`에 대해 발급된 값이 아닌 경우"),
+            cells("400", "ERR_105", "유효하지 않은 company", "API 사용 권한이 등록되지 않은 `company`인 경우"),
+            cells("400", "5113", "데이터 처리 실패", "인증 처리 중 오류가 발생한 경우 (재시도 요망)"),
+        ]}>
+    </Table>
+
+    ```json
+    {
+      "type": "adjust",
+      "code": "ERR_103",
+      "description": "token 과 company 미일치(인증 실패)",
+      "message": "필수 데이터가 누락되었습니다."
+    }
+    ```
+
+    ### 요청값 오류
+    `code` 없이 `type`, `message`만 응답됩니다.
+    <Table
+        headers={[{"status": "HTTP 상태"}, {"message": "message"}, {"cause": "발생 조건"}]}
+        bodys={[
+            cells("400", "미래의 시간으로 요청이 불가능합니다.", "`date`가 오늘 이후인 경우"),
+            cells("403", "당일 호출의 경우 오전에는 불가능합니다.", "`date`가 오늘이고, 오전(12시 이전)에 호출한 경우"),
+        ]}>
+    </Table>
+
+    ```json
+    {
+      "type": "adjust",
+      "message": "당일 호출의 경우 오전에는 불가능합니다."
+    }
+    ```
+</Frame>

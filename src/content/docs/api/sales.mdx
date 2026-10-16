@@ -8,365 +8,257 @@ sidebar:
 #        variant: tip
 description: 거래와 관련된 API 기능을 제공합니다.
 releasedAt: 2024-08-01
-writtenAt: 2024-08-01
+writtenAt: 2026-10-16
 ---
 
-import Button from "/src/components/Button.astro";
 import Frame from "/src/components/Frame.astro";
 import Table from "/src/components/Table.astro";
+import {headers, row, reqHeaders, reqRow, cells} from "/src/components/tableRows.js";
 
 <Frame>
-발생한 매출에 대해 거래내역을 조회할 수 있습니다.\
-거래내역은 매출에 대한 상세 정보를 제공합니다.
+단말기에서 발생한 매출의 거래내역을 조회할 수 있습니다.<br/>
+거래내역은 승인·취소 건별로 결제수단, 카드/VAN/매입사 코드, 상품 정보, 매입·입금 예정일 등의 상세 정보를 제공합니다.<br/><br/>
+
+<b>거래내역 조회는 `일 단위 전체 조회`와 `시간 구간 조회(최대 60분)` 두 가지 방식을 지원합니다.</b>
+
+- 모든 요청은 헤더에 `company`, `token`이 필요합니다. ([API 시작하기](/api/) 참고)
+- `GET`, `POST` 방식을 모두 지원하며, 요청 Body는 사용하지 않습니다.
+- 조회 결과가 없는 경우 HTTP 상태코드 `404`와 함께 `salesList` 필드가 제외된 응답이 전달됩니다.
 </Frame>
 
-## 기본 호출 구문
+## 일일 거래내역 조회
 <Frame>
-```ts
+    <strong style={"color: green"}>GET | POST</strong> /sales/`{date}`
 
-const API = axios.create({
-  baseURL: `http://api.ubcn.co.kr/api`,
-  headers: {
-    "Access-Control-Allow-Origin": "*",
-    "company": "{company}",
-    "token": "{token}",
-  },
-});
+    요청일자(`date`)에 발생한 거래내역 전체를 조회합니다.<br/>
+    승인 건은 거래일자 기준, 취소 건은 취소일자 기준으로 포함됩니다.
 
-//get, post 모두 지원합니다.
-const res = await API.get("/sales/{date}/{time}/{minute}");
-console.log(res.data);
+    ### Request Schema
+    요청에서 필요로 하는 필드는 다음과 같습니다.
+    <Table headers={reqHeaders} bodys={[
+        reqRow("date", "Y", "String", "조회일자 (Path)", "`YYYYMMDD` 규격<br/>오늘 이후의 일자는 요청 불가"),
+    ]}></Table>
 
-// 프로세스가 제대로 완료되지 않은 경우 에러 코드가 존재합니다.
-if (res.code != null) {
-  return alert(res.decription);
-}
+    ### 호출구문
+    ```ts
+    const API = axios.create({
+      baseURL: `http://api.ubcn.co.kr/api`,
+      headers: {
+        "company": "{company}",
+        "token": "{token}",
+      },
+      // 조회 결과가 없을 때 404가 응답되므로, 404는 정상 응답으로 처리합니다.
+      validateStatus: (status) => status < 500,
+    });
 
-```
-</Frame>
+    // get, post 모두 지원합니다.
+    // 예시) 2026년 10월 15일 하루 동안의 전체 거래내역 조회
+    const res = await API.get("/sales/20261015");
 
-<Frame>
-    ### Schema
+    if (res.status === 200) {
+      console.log(res.data.salesList);
+    } else if (res.status === 404) {
+      console.log("조회된 거래내역이 없습니다.");
+    } else {
+      // 요청 오류: code(존재하는 경우), message 를 확인합니다.
+      console.error(res.data.code, res.data.message);
+    }
+    ```
+    <br/>
+
+    ### Response Schema
     결과 값에 들어 있는 필드는 다음과 같습니다.
-    <Table
-        headers={[{"title": "필드명"}, {"subTitle": "상세필드명"}, {"notNull": "필수"},
-            {"argsType": "타입"}, {"desc": "설명"}, {"etc": "비고"}]}
-        bodys={
-            [
-                [
-                    {"title": "decription"},
-                    {"subTitle": "-"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "API 상세설명"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "message"},
-                    {"subTitle": "-"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "응답 메시지"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "type"},
-                    {"subTitle": "-"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "API 유형"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesDate"},
-                    {"subTitle": "-"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "요청일자"},
-                    {"etc": "YYYYMMDD"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "transactionDate"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "매출일자"},
-                    {"etc": "YYYYMMDD"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "transactionNo"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "거래고유번호"},
-                    {"etc": "UBCn 거래번호 (PK)"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "terminalId"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "단말기 ID"},
-                    {"etc": "UBCn 단말기 ID"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "terminalCode"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "단말기 코드"},
-                    {"etc": "가맹점 관리 단말기 코드"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "placeCode"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "위치코드(점포코드)"},
-                    {"etc": "점포코드"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "placeNo"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "위치순번(POS번호)"},
-                    {"etc": "POS번호"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "terminalTransSeq"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "단말기 거래 번호"},
-                    {"etc": "단말기 거래 번호"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "tranDate"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "거래일자"},
-                    {"etc": "거래일자(YYYYMMDD)"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "tranTime"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "거래시간"},
-                    {"etc": "거래시간(HH24MISS)"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "payStep"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "거래 종류"},
-                    {"etc": "1:거래, 2:취소"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "payType"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "지불 종류"},
-                    {"etc": "1:현금, 2:신용카드, 3:선불카드"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "cardCode"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "카드사 코드"},
-                    {"etc": "카드사 코드 참고"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "purchaseCode"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "매입사 코드"},
-                    {"etc": "매입사 코드 참고"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "vanCode"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "VAN사 코드"},
-                    {"etc": "VAN사 코드 참고"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "cardNo"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "카드번호"},
-                    {"etc": "마스킹된 카드번호"}
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "approvalNo"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "승인번호"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "approvalDate"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "승인일자"},
-                    {"etc": "YYYYMMDD"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "approvalTime"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "승인시간"},
-                    {"etc": "HH24MISS"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "orgTransactionDate"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "원거래일자"},
-                    {"etc": "취소시 원거래 일자"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "orgTerminalTransSeq"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "원거래 단말기 거래 번호"},
-                    {"etc": "취소시 단말기 거래 번호"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "orgApprovalNo"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "원거래 승인번호"},
-                    {"etc": "취소시 원거래 승인번호"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "colNo"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "머신기 컬럼"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "productName"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "상품명"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "productCode"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "상품코드"},
-                    {"etc": "상품코드"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "productBarcode"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "상품바코드"},
-                    {"etc": "default: -"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "count"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "판매수량"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "price"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "판매단가"},
-                    {"etc": "-"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "salesPrice"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "판매금액"},
-                    {"etc": "판매수량 * 판매단가"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "discount"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "할인금액"},
-                    {"etc": "할인 결제시(현재 지원 안함)"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "point"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "사용포인트"},
-                    {"etc": "포인트 혼용 결제시 (현재 지원 안함)"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "amount"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "결제금액"},
-                    {"etc": "판매금액 - 할인금액 - 포인트"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "beforeBalance"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "사용전금액"},
-                    {"etc": "티머니/이즐 사용전 잔액"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "afterBalance"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "사용후금액"},
-                    {"etc": "티머니/이즐 사용후 잔액"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "purchaseExpDate"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "매입 예정일"},
-                    {"etc": "카드결제 시 매입 예정일"},
-                ],
-                [
-                    {"title": "salesList"},
-                    {"subTitle": "payExpDate"},
-                    {"notNull": "Y"},
-                    {"argsType": "String"},
-                    {"desc": "입금 예정일"},
-                    {"etc": "카드결제시 입금 예정일"},
-                ],
-            ]
-        }>
-    </Table>
+    <Table headers={headers} bodys={[
+        row("type", "-", "Y", "String", "API 유형", "`sales` 고정"),
+        row("message", "-", "Y", "String", "응답 메시지", "조회 성공: `Get SalesList at {date}`<br/>결과 없음: `No Result`"),
+        row("salesDate", "-", "Y", "String", "요청일자", "YYYYMMDD"),
+        row("decription", "-", "Y", "String", "API 상세설명", "필드명 표기(`decription`)는 실제 응답 키 그대로입니다."),
+        row("salesList", "-", "N", "Array", "거래내역 리스트", "객체 리스트<br/>조회 결과가 없으면 필드 자체가 제외됨"),
+        row("salesList", "transactionDate", "Y", "String", "매출일자", "YYYYMMDD<br/>취소 건은 취소일자"),
+        row("salesList", "transactionNo", "Y", "String", "거래고유번호", "UBCn 거래번호"),
+        row("salesList", "terminalId", "Y", "String", "단말기 ID", "UBCn 단말기 ID"),
+        row("salesList", "terminalCode", "Y", "String", "단말기(자판기) 코드", "가맹점 관리 단말기 코드"),
+        row("salesList", "placeCode", "Y", "String", "위치코드(점포코드)", "미등록 시 `-`"),
+        row("salesList", "placeNo", "Y", "String", "위치순번(POS번호)", "미등록 시 `-`"),
+        row("salesList", "terminalTransSeq", "N", "String", "단말기 거래 일련번호", "-"),
+        row("salesList", "tranDate", "Y", "String", "거래일자", "YYYYMMDD<br/>취소 건은 취소일자"),
+        row("salesList", "tranTime", "Y", "String", "거래시간", "HH24MISS<br/>취소 건은 취소시간"),
+        row("salesList", "payStep", "Y", "String", "거래 종류", "`1`: 승인, `2`: 취소"),
+        row("salesList", "payType", "Y", "String", "지불 종류", "`1`: 현금, `2`: 신용카드, `3`: 선불카드(교통카드), `4`: 간편결제"),
+        row("salesList", "cardCode", "Y", "String", "카드사(발급사) 코드", "현금 결제 시 `-`<br/>선불카드는 카드 종류 코드"),
+        row("salesList", "purchaseCode", "Y", "String", "매입사 코드", "현금 결제 시 `-`<br/>선불카드는 카드 종류 코드"),
+        row("salesList", "vanCode", "Y", "String", "VAN사 코드", "현금·선불카드 결제 시 `-`"),
+        row("salesList", "cardNo", "N", "String", "카드번호", "마스킹된 카드번호"),
+        row("salesList", "approvalNo", "Y", "String", "승인번호", "승인번호가 없는 경우 `-`"),
+        row("salesList", "approvalDate", "Y", "String", "승인일자", "YYYYMMDD<br/>취소 건은 취소일자"),
+        row("salesList", "approvalTime", "Y", "String", "승인시간", "HH24MISS<br/>취소 건은 취소시간"),
+        row("salesList", "orgTransactionDate", "N", "String", "원거래일자", "취소 시 원거래 일자"),
+        row("salesList", "orgTerminalTransSeq", "N", "String", "원거래 단말기 거래 일련번호", "취소 시 원거래 단말기 거래번호"),
+        row("salesList", "orgApprovalNo", "Y", "String", "원거래 승인번호", "취소 시 원거래 승인번호<br/>없는 경우 `-`"),
+        row("salesList", "colNo", "Y", "String", "머신기 컬럼번호", "-"),
+        row("salesList", "productCode", "Y", "String", "상품코드", "미등록 시 `-`"),
+        row("salesList", "productName", "Y", "String", "상품명", "미등록 시 `-`"),
+        row("salesList", "productBarcode", "Y", "String", "상품바코드", "미등록 시 `-`"),
+        row("salesList", "count", "Y", "String", "판매수량", "항상 `1`<br/>여러 상품을 한 번에 결제한 경우 상품별로 행이 분리되어 전달됨"),
+        row("salesList", "price", "Y", "String", "판매단가", "-"),
+        row("salesList", "salePrice", "Y", "String", "판매금액", "판매수량 * 판매단가"),
+        row("salesList", "discount", "Y", "String", "할인금액", "현재 미지원 (항상 `0`)"),
+        row("salesList", "point", "Y", "String", "사용포인트", "현재 미지원 (항상 `0`)"),
+        row("salesList", "amount", "Y", "String", "결제금액", "판매금액 - 할인금액 - 포인트"),
+        row("salesList", "beforeBalance", "Y", "String", "사용 전 잔액", "현재 미지원 (항상 `0`)"),
+        row("salesList", "afterBalance", "Y", "String", "사용 후 잔액", "현재 미지원 (항상 `0`)"),
+        row("salesList", "purchaseExpDate", "Y", "String", "매입 예정일", "YYYYMMDD<br/>신용·간편·선불 결제만 제공, 그 외 및 취소 건은 `-`"),
+        row("salesList", "payExpDate", "Y", "String", "입금 예정일", "YYYYMMDD<br/>현금은 거래일자, 취소 건은 `-`<br/>예정일이며 확정된 입금일이 아님 (아래 '입금 예정일 (주의)' 참고)"),
+    ]}></Table>
+
+    ### Response JSON 예시
+    아래 값은 이해를 돕기 위한 예시입니다. (HTTP 200)
+    ```json
+    {
+      "type": "sales",
+      "message": "Get SalesList at 20261015",
+      "salesDate": "20261015",
+      "decription": "요청 일시 기준으로 매출을 추출합니다.",
+      "salesList": [
+        {
+          "transactionDate": "20261015",
+          "transactionNo": "1234567890",
+          "terminalId": "1000000001",
+          "terminalCode": "VM-001",
+          "placeCode": "S001",
+          "placeNo": "0001",
+          "terminalTransSeq": "0123",
+          "tranDate": "20261015",
+          "tranTime": "093015",
+          "payStep": "1",
+          "payType": "2",
+          "cardCode": "01",
+          "vanCode": "01",
+          "purchaseCode": "01",
+          "cardNo": "536181******1234",
+          "approvalNo": "12345678",
+          "approvalDate": "20261015",
+          "approvalTime": "093015",
+          "orgTransactionDate": "20261015",
+          "orgTerminalTransSeq": "0123",
+          "orgApprovalNo": "12345678",
+          "colNo": "11",
+          "productCode": "P0001",
+          "productName": "생수 500ml",
+          "productBarcode": "8801234567890",
+          "count": "1",
+          "price": "1000",
+          "salePrice": "1000",
+          "discount": "0",
+          "point": "0",
+          "amount": "1000",
+          "beforeBalance": "0",
+          "afterBalance": "0",
+          "purchaseExpDate": "20261016",
+          "payExpDate": "20261021"
+        }
+      ]
+    }
+    ```
+
+    조회 결과가 없는 경우 (HTTP 404)
+    ```json
+    {
+      "type": "sales",
+      "message": "No Result",
+      "salesDate": "20261015",
+      "decription": "요청 일시 기준으로 매출을 추출합니다."
+    }
+    ```
 </Frame>
-{/*<Button url={"https://devapi.ubcn.co.kr:17881/list/noticeList"} title={"테스트 버튼"}/>*/}
+
+## 시간 구간 거래내역 조회
+<Frame>
+    <strong style={"color: green"}>GET | POST</strong> /sales/`{date}`/`{time}`/`{minute}`
+
+    요청일자(`date`)의 기준시간(`time`)으로부터 `minute`분 이전까지 발생한 거래내역을 조회합니다.<br/>
+    조회 구간은 `(time - minute, time]` 입니다. (시작 시각 미포함, 기준시간 포함)<br/>
+    실시간 연동을 위해 주기적으로 호출하는 경우, 이전 호출의 `time`을 다음 호출의 시작점으로 맞추면 누락 없이 조회할 수 있습니다.
+
+    ### Request Schema
+    요청에서 필요로 하는 필드는 다음과 같습니다.
+    <Table headers={reqHeaders} bodys={[
+        reqRow("date", "Y", "String", "조회일자 (Path)", "`YYYYMMDD` 규격<br/>오늘 이후의 일자는 요청 불가"),
+        reqRow("time", "Y", "String", "기준시간 (Path)", "`HHMISS` 규격 (24시간제)<br/>`240000` 입력 시 `235959`로 처리"),
+        reqRow("minute", "Y", "String", "조회 구간(분) (Path)", "기준시간으로부터 몇 분 전까지 조회할지 지정<br/>최대 `60`"),
+    ]}></Table>
+
+    ### 요청 제약사항
+    - `minute`은 최대 `60`분까지 지정할 수 있습니다.
+    - 조회 구간은 요청일자를 넘어갈 수 없습니다. (`time - minute`이 `000000`보다 작으면 요청 불가)
+    - 당일 조회 시, `time`은 현재 시각 기준 **5분 이전**이어야 합니다. 단말기 거래 데이터의 수신 지연을 고려한 제약입니다.
+
+    ### 호출구문
+    ```ts
+    // get, post 모두 지원합니다.
+    // 예시) 2026년 10월 15일 14:00:00 기준, 30분 전(13:30:00 초과 ~ 14:00:00 이하)의 거래내역 조회
+    const res = await API.get("/sales/20261015/140000/30");
+
+    // 예시) 2026년 10월 15일 23:00:00 ~ 23:59:59 의 거래내역 조회
+    const res2 = await API.get("/sales/20261015/240000/60");
+    ```
+
+    <b>※ 응답 규격 및 예시는 상단의 [일일 거래내역 조회]와 동일합니다.</b>
+</Frame>
+
+## 거래 데이터 해석 시 참고사항
+<Frame>
+    - **취소 거래**: 취소가 발생하면 원거래(승인, `payStep: 1`)와 별개로 취소 건(`payStep: 2`)이 취소일자 기준으로 추가 전달됩니다.
+    취소 건의 `orgTransactionDate`, `orgTerminalTransSeq`, `orgApprovalNo`로 원거래를 확인할 수 있습니다.
+    - **복수 상품 결제**: 한 번의 결제로 여러 상품을 구매한 경우, 동일한 `transactionNo`로 상품별 행이 나뉘어 전달되며 각 행의 `amount`는 해당 상품 금액입니다.
+    - **입금 예정일 (주의)**: `payExpDate`는 영업일 기준으로 산정한 **순수한 예정일**이며, 입금일이 확정된 값이 아닙니다. 실제 입금일은 VAN사를 통해 입금 데이터가 전달되는 시점에 확정되므로 예정일과 다를 수 있습니다. 입금 여부·확정된 입금일은 [정산내역 요청](/api/adjust/)으로 확인해 주세요.
+    - **매입 예정일**: `purchaseExpDate`도 영업일 기준으로 산정한 예정일이며, 실제 매입일과 다를 수 있습니다.
+    - 응답 필드의 순서는 보장되지 않습니다. 필드명으로 값을 참조해 주세요.
+</Frame>
+
+## 에러 응답
+<Frame>
+    요청이 정상적으로 처리되지 않은 경우 아래와 같은 형식으로 응답됩니다.
+
+    ### 인증 오류
+    `code`가 포함된 형식으로 응답됩니다. 코드 전체 목록은 [응답코드 정리](/api/code/)를 참고해 주세요.
+    <Table
+        headers={[{"status": "HTTP 상태"}, {"code": "code"}, {"description": "description"}, {"cause": "발생 조건"}]}
+        bodys={[
+            cells("400", "ERR_101", "token 데이터 누락", "헤더에 `token`이 없는 경우"),
+            cells("400", "ERR_102", "company 데이터 누락", "헤더에 `company`가 없는 경우"),
+            cells("400", "ERR_103", "token 과 company 미일치(인증 실패)", "`token`이 `company`에 대해 발급된 값이 아닌 경우"),
+            cells("400", "ERR_105", "유효하지 않은 company", "API 사용 권한이 등록되지 않은 `company`인 경우"),
+            cells("400", "5113", "데이터 처리 실패", "인증 처리 중 오류가 발생한 경우 (재시도 요망)"),
+        ]}>
+    </Table>
+
+    ```json
+    {
+      "type": "sales",
+      "code": "ERR_103",
+      "description": "token 과 company 미일치(인증 실패)",
+      "message": "필수 데이터가 누락되었습니다."
+    }
+    ```
+
+    ### 요청값 오류
+    `code` 없이 `type`, `message`만 응답됩니다. (HTTP 400)
+    <Table
+        headers={[{"message": "message"}, {"cause": "발생 조건"}]}
+        bodys={[
+            cells("오늘 날짜 이후의 일자는 요청이 불가능합니다.", "`date`가 오늘 이후인 경우"),
+            cells("요청값에는 null을 포함할 수 없습니다.", "`time` 또는 `minute`이 비어 있는 경우"),
+            cells("요청기준시간이 요청기간보다 작습니다.", "`time - minute`이 `000000`보다 작은 경우"),
+            cells("현재시간의 5분 이전 거래만 조회 가능합니다.", "당일 조회 시 `time`이 현재 시각 5분 전보다 늦은 경우"),
+            cells("기준시간의 60분 이전까지만 조회 가능합니다.", "`minute`이 60을 초과한 경우"),
+        ]}>
+    </Table>
+
+    ```json
+    {
+      "type": "sales",
+      "message": "현재시간의 5분 이전 거래만 조회 가능합니다."
+    }
+    ```
+</Frame>
